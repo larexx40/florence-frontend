@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 
-type BadgeStatus = "Pending" | "Approved" | "Rejected" | "Under Review" | "Active" | "Inactive" | "Sale" | "New" | "Trending" | "Hot"
+type BadgeStatus = "Pending" | "Approved" | "Rejected" | "Under Review" | "Active" | "Inactive" | "Sale" | "New" | "Trending" | "Hot" | "Processing" | "Shipped" | "Delivered" | "Cancelled" | "Expired" | "Scheduled"
 
 interface StatusBadgeProps {
   status: BadgeStatus
@@ -18,6 +18,12 @@ const statusStyles: Record<BadgeStatus, string> = {
   New: "bg-cblue-100 text-cblue-800",
   Trending: "bg-message-100 text-message-800",
   Hot: "bg-error-100 text-error-800",
+  Processing: "bg-cblue-100 text-cblue-800",
+  Shipped: "bg-message-100 text-message-800",
+  Delivered: "bg-success-100 text-success-800",
+  Cancelled: "bg-error-100 text-error-800",
+  Expired: "bg-cdark-100 text-cdark-500",
+  Scheduled: "bg-cblue-50 text-cblue-600",
 }
 
 export default function StatusBadge({ status, className }: StatusBadgeProps) {
