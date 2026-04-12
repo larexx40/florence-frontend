@@ -1,9 +1,8 @@
-import { useState } from "react"
+﻿import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import { login } from "@/store/slices/auth.slice"
 import Button from "@/ui/button/button"
-import Icon, { HEROICONS } from "@/ui/icons/icon"
 
 export default function Login() {
   const [email, setEmail] = useState("")
@@ -44,7 +43,7 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2.5 rounded-lg border border-cdark-200 text-sm focus:outline-none focus:border-cblue-500"
-              placeholder="••••••••"
+              placeholder="********"
               required
             />
           </div>

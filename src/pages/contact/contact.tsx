@@ -1,4 +1,27 @@
+import SocialLinks from "@/components/shared/social-links"
+import { BUSINESS_DETAILS } from "@/constants/business"
+
 export default function Contact() {
+  const contactItems = [
+    {
+      title: "Address",
+      content: BUSINESS_DETAILS.address,
+    },
+    {
+      title: "Call",
+      content: BUSINESS_DETAILS.phone,
+    },
+    {
+      title: "WhatsApp Only",
+      content: BUSINESS_DETAILS.whatsapp,
+    },
+    {
+      title: "Website",
+      content: BUSINESS_DETAILS.websiteUrl.replace("https://", "").replace(/\/$/, ""),
+      href: BUSINESS_DETAILS.websiteUrl,
+    },
+  ]
+
   return (
     <div className="container mx-auto py-10 mt-8 px-4">
       <div className="max-w-4xl mx-auto">
@@ -9,42 +32,92 @@ export default function Contact() {
               <img src="/images/section/contact.jpg" alt="Contact" className="w-full h-[250px] object-cover" />
             </div>
             <div className="space-y-4">
-              <div>
-                <h6 className="font-semibold mb-1">Address</h6>
-                <p className="text-sm text-cdark-600">123 Yarran st, Punchbowl, NSW 2196, Australia</p>
+              <p className="text-sm text-cdark-600">
+                Everything Florence is a wholesale store for bags, slippers, heels, souvenirs, kitchen gadgets,
+                accessories, and more. We do not sell to end users.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href={BUSINESS_DETAILS.whatsappOrderUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center rounded-lg bg-cblue-600 px-4 py-2 text-sm font-medium text-white hover:bg-cblue-700 transition-colors"
+                >
+                  Order on WhatsApp
+                </a>
+                <a
+                  href={BUSINESS_DETAILS.mapUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center rounded-lg border border-cdark-200 px-4 py-2 text-sm font-medium text-cdark-700 hover:border-cblue-600 hover:text-cblue-600 transition-colors"
+                >
+                  Get Directions
+                </a>
               </div>
+              {contactItems.map((item) => (
+                <div key={item.title}>
+                  <h6 className="font-semibold mb-1">{item.title}</h6>
+                  {item.href ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm text-cblue-600 hover:text-cblue-700"
+                    >
+                      {item.content}
+                    </a>
+                  ) : (
+                    <p className="text-sm text-cdark-600">{item.content}</p>
+                  )}
+                </div>
+              ))}
               <div>
-                <h6 className="font-semibold mb-1">Phone</h6>
-                <p className="text-sm text-cdark-600">(64) 8342 1245</p>
-              </div>
-              <div>
-                <h6 className="font-semibold mb-1">Email</h6>
-                <p className="text-sm text-cdark-600">support@everythingflorence.com</p>
+                <h6 className="font-semibold mb-2">Follow or Join Us</h6>
+                <SocialLinks />
               </div>
             </div>
           </div>
           <div>
-            <form className="space-y-4">
+            <div className="rounded-2xl border border-cdark-200 p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Name</label>
-                <input type="text" className="w-full px-4 py-2.5 rounded-lg border border-cdark-200 text-sm focus:outline-none focus:border-cblue-500" placeholder="Your name" />
+                <h5 className="text-lg font-semibold mb-2">How to Reach Us Quickly</h5>
+                <p className="text-sm text-cdark-600">
+                  For fast responses, use WhatsApp for orders, join the Telegram wholesale group for updates, or
+                  browse the online store to place orders directly.
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Email</label>
-                <input type="email" className="w-full px-4 py-2.5 rounded-lg border border-cdark-200 text-sm focus:outline-none focus:border-cblue-500" placeholder="your@email.com" />
+                <h6 className="font-semibold mb-1">Wholesale Enquiries</h6>
+                <p className="text-sm text-cdark-600">
+                  Call <span className="font-medium">{BUSINESS_DETAILS.phone}</span> for enquiries and use WhatsApp on{" "}
+                  <span className="font-medium">{BUSINESS_DETAILS.whatsapp}</span> for order-related chats.
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Subject</label>
-                <input type="text" className="w-full px-4 py-2.5 rounded-lg border border-cdark-200 text-sm focus:outline-none focus:border-cblue-500" placeholder="Subject" />
+                <h6 className="font-semibold mb-1">Store Location</h6>
+                <p className="text-sm text-cdark-600">
+                  Visit us at {BUSINESS_DETAILS.address}.
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Message</label>
-                <textarea rows={5} className="w-full px-4 py-2.5 rounded-lg border border-cdark-200 text-sm focus:outline-none focus:border-cblue-500 resize-none" placeholder="Your message..." />
+                <h6 className="font-semibold mb-1">Online Shopping</h6>
+                <a
+                  href={BUSINESS_DETAILS.websiteUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-cblue-600 hover:text-cblue-700"
+                >
+                  Shop on {BUSINESS_DETAILS.websiteUrl.replace("https://", "").replace(/\/$/, "")}
+                </a>
               </div>
-              <button type="submit" className="w-full px-6 py-3 bg-cblue-600 text-white rounded-lg text-sm font-medium hover:bg-cblue-700 transition-colors">
-                Send Message
-              </button>
-            </form>
+              <div>
+                <h6 className="font-semibold mb-1">Important Note</h6>
+                <p className="text-sm text-cdark-600">
+                  Everything Florence is focused on wholesale buyers. Orders and enquiries are handled through the
+                  channels above.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,9 +1,8 @@
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 import type { RootState } from "@/store/store.index"
 import { toggleCart } from "@/store/slices/cart.slice"
 import Icon, { HEROICONS } from "@/ui/icons/icon"
-import { cn } from "@/lib/utils"
 import { useState } from "react"
 
 const navLinks = [
@@ -17,7 +16,6 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const dispatch = useDispatch()
-  const navigate = useNavigate()
   const cartCount = useSelector((state: RootState) => state.cart.items.reduce((sum, i) => sum + i.quantity, 0))
 
   return (

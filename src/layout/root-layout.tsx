@@ -1,4 +1,6 @@
-import { Outlet } from "react-router-dom"
+﻿import { Outlet } from "react-router-dom"
+import SocialLinks from "@/components/shared/social-links"
+import { BUSINESS_DETAILS } from "@/constants/business"
 import Navbar from "@/ui/navigation/navbar"
 
 export default function RootLayout() {
@@ -14,37 +16,51 @@ export default function RootLayout() {
             <div>
               <h4 className="text-lg font-semibold mb-4">Business Contact</h4>
               <ul className="space-y-2 text-sm text-cdark-300">
-                <li>123 Yarran st, Punchbowl, NSW 2196, Australia</li>
-                <li>(64) 8342 1245</li>
-                <li>support@everythingflorence.com</li>
+                <li>{BUSINESS_DETAILS.address}</li>
+                <li>Call: {BUSINESS_DETAILS.phone}</li>
+                <li>WhatsApp only: {BUSINESS_DETAILS.whatsapp}</li>
+                <li>Wholesale only. No end users.</li>
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-semibold mb-4">Newsletter</h4>
-              <p className="text-sm text-cdark-300 mb-3">Get the latest news about trends, promotions, and much more!</p>
-              <form className="flex">
-                <input type="email" placeholder="Email address" className="flex-1 px-3 py-2 rounded-l-lg bg-cdark-800 text-white text-sm border border-cdark-700 focus:outline-none focus:border-cblue-500" />
-                <button type="submit" className="px-4 py-2 bg-cblue-600 text-white rounded-r-lg hover:bg-cblue-700 text-sm">
-                  →
+              <h4 className="text-lg font-semibold mb-4">Mailing List</h4>
+              <p className="text-sm text-cdark-300 mb-3">Get promo drops, restock alerts, and wholesale updates in your inbox.</p>
+              <form
+                action={BUSINESS_DETAILS.newsletterActionUrl}
+                method="post"
+                target="_blank"
+                className="space-y-3"
+              >
+                <input type="hidden" name="form_type" value="customer" />
+                <input type="hidden" name="utf8" value="✓" />
+                <input type="hidden" name="contact[tags]" value="newsletter,website" />
+                <input
+                  type="email"
+                  name="contact[email]"
+                  required
+                  placeholder="Email address"
+                  className="w-full px-3 py-2 rounded-lg bg-cdark-800 text-white text-sm border border-cdark-700 focus:outline-none focus:border-cblue-500"
+                />
+                <button type="submit" className="w-full px-4 py-2 bg-cblue-600 text-white rounded-lg hover:bg-cblue-700 text-sm">
+                  Subscribe for Promotions
                 </button>
               </form>
             </div>
             <div>
-              <h4 className="text-lg font-semibold mb-4">About Us</h4>
-              <ul className="space-y-2 text-sm text-cdark-300">
-                <li><a href="/about" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="/shop" className="hover:text-white transition-colors">Our Store</a></li>
-                <li><a href="/about" className="hover:text-white transition-colors">Our Story</a></li>
-              </ul>
+              <h4 className="text-lg font-semibold mb-4">Connect With Us</h4>
+              <p className="text-sm text-cdark-300 mb-3">Follow our socials and join the Telegram wholesale group.</p>
+              <SocialLinks
+                className="gap-2"
+                itemClassName="border-cdark-700 bg-cdark-800 text-cdark-100 hover:border-cblue-500 hover:text-white"
+              />
             </div>
             <div>
               <h4 className="text-lg font-semibold mb-4">Resources</h4>
               <ul className="space-y-2 text-sm text-cdark-300">
-                <li><a href="/privacy" className="hover:text-white transition-colors">Privacy Policies</a></li>
-                <li><a href="/terms" className="hover:text-white transition-colors">Terms & Conditions</a></li>
-                <li><a href="/returns" className="hover:text-white transition-colors">Returns & Refunds</a></li>
-                <li><a href="/faq" className="hover:text-white transition-colors">FAQ&apos;s</a></li>
+                <li><a href="/about" className="hover:text-white transition-colors">About Us</a></li>
+                <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
+                <li><a href="/shop" className="hover:text-white transition-colors">Our Store</a></li>
+                <li><a href={BUSINESS_DETAILS.websiteUrl} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Shopify Store</a></li>
               </ul>
             </div>
           </div>

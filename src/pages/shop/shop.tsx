@@ -2,8 +2,6 @@ import { useState, useMemo } from "react"
 import { useSearchParams } from "react-router-dom"
 import { mockProducts } from "@/mockdata/product/products"
 import ProductCard from "@/components/shared/product-card"
-import Button from "@/ui/button/button"
-import Icon, { HEROICONS } from "@/ui/icons/icon"
 
 const categories = ["All", "Tops", "Women", "Men", "Accessories"]
 const sortOptions = ["Featured", "Price: Low to High", "Price: High to Low", "Newest"]

@@ -5,6 +5,8 @@ import { collectionCategories } from "@/mockdata/category/categories"
 import { categoryTabs } from "@/mockdata/category/categories"
 import { heroSlides } from "@/mockdata/slider/sliders"
 import ProductCard from "@/components/shared/product-card"
+import SocialLinks from "@/components/shared/social-links"
+import { BUSINESS_DETAILS } from "@/constants/business"
 import Button from "@/ui/button/button"
 import Icon, { HEROICONS } from "@/ui/icons/icon"
 import { cn } from "@/lib/utils"
@@ -20,10 +22,29 @@ export default function Home() {
     return () => clearInterval(timer)
   }, [])
 
-  const slide = heroSlides[currentSlide]
   const bestSellers = mockProducts.slice(0, 6)
   const todaysPicks = mockProducts.slice(6)
   const activeCategories = categoryTabs.find((t) => t.value === activeCategoryTab)?.categories || []
+  const quickActions = [
+    {
+      title: "Wholesale Orders",
+      desc: "Chat with us directly for reseller orders and bulk enquiries.",
+      href: BUSINESS_DETAILS.whatsappOrderUrl,
+      cta: "Order on WhatsApp",
+    },
+    {
+      title: "Visit the Shop",
+      desc: BUSINESS_DETAILS.address,
+      href: BUSINESS_DETAILS.mapUrl,
+      cta: "Get Directions",
+    },
+    {
+      title: "Stay Updated",
+      desc: "Join our Telegram community and follow new arrivals across our social pages.",
+      href: BUSINESS_DETAILS.telegramUrl,
+      cta: "Join Telegram",
+    },
+  ]
 
   return (
     <div>
@@ -34,7 +55,7 @@ export default function Home() {
             key={s.id}
             className={cn(
               "absolute inset-0 transition-opacity duration-700",
-              idx === currentSlide ? "opacity-100" : "opacity-0"
+              idx === currentSlide ? "opacity-100 pointer-events-auto z-10" : "opacity-0 pointer-events-none z-0"
             )}
           >
             <img src={s.image} alt={s.heading} className="w-full h-full object-cover" />
@@ -48,11 +69,15 @@ export default function Home() {
                   "max-w-lg",
                   s.alignment === "right" && "ml-auto"
                 )}>
-                  <h2 className="text-4xl md:text-6xl font-semibold text-white mb-4" dangerouslySetInnerHTML={{ __html: s.heading.replace(" ", "<br/>") }} />
-                  <p className="text-lg text-white/80 mb-6">{s.subheading}</p>
-                  <Link to={s.ctaLink}>
+                  <p className="mb-3 text-sm font-semibold uppercase tracking-[0.28em] text-white/70">Wholesale Store in Ibadan</p>
+                  <h2 className="text-4xl md:text-6xl font-semibold text-white mb-4">
+                    Everything Florence
+                  </h2>
+                  <p className="text-lg text-white/80 mb-3">{BUSINESS_DETAILS.description}</p>
+                  <p className="text-sm text-white/70 mb-6">{BUSINESS_DETAILS.productSummary}</p>
+                  <Link to="/shop">
                     <Button variant="primary" className="bg-white text-cdark-900 hover:bg-cdark-100">
-                      {s.ctaText}
+                      Shop Now
                       <Icon icon={HEROICONS.ARROW_RIGHT} size={16} />
                     </Button>
                   </Link>
@@ -78,13 +103,13 @@ export default function Home() {
       {/* Top Bar Marquee */}
       <div className="bg-cdark-900 text-white py-2 overflow-hidden">
         <div className="flex animate-marquee whitespace-nowrap">
-          {["Return extended to 60 days", "Life-time Guarantee", "Limited-Time Offer"].map((text, i) => (
+          {["Wholesale only", "Bags, slippers, heels, gadgets, and accessories", "Join our Telegram group for updates"].map((text, i) => (
             <span key={i} className="mx-8 text-sm flex items-center gap-4">
               {text}
               <span className="w-1.5 h-1.5 rounded-full bg-cblue-400" />
             </span>
           ))}
-          {["Return extended to 60 days", "Life-time Guarantee", "Limited-Time Offer"].map((text, i) => (
+          {["Wholesale only", "Bags, slippers, heels, gadgets, and accessories", "Join our Telegram group for updates"].map((text, i) => (
             <span key={`dup-${i}`} className="mx-8 text-sm flex items-center gap-4">
               {text}
               <span className="w-1.5 h-1.5 rounded-full bg-cblue-400" />
@@ -92,6 +117,29 @@ export default function Home() {
           ))}
         </div>
       </div>
+
+      <section className="bg-cgrey-50 py-8">
+        <div className="container mx-auto px-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            {quickActions.map((item) => (
+              <a
+                key={item.title}
+                href={item.href}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-2xl border border-cdark-200 bg-white p-6 transition-colors hover:border-cblue-500"
+              >
+                <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-cblue-600">{item.title}</p>
+                <p className="mb-4 text-sm text-cdark-600">{item.desc}</p>
+                <span className="inline-flex items-center gap-2 text-sm font-medium text-cdark-900">
+                  {item.cta}
+                  <Icon icon={HEROICONS.ARROW_RIGHT} size={16} />
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Collection Categories */}
       <section className="py-12">
@@ -128,17 +176,26 @@ export default function Home() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="relative rounded-2xl overflow-hidden h-[400px]">
-            <img src="/images/banner/fashion-1.jpg" alt="Summer Sale" className="w-full h-full object-cover" />
+            <img src="/images/banner/fashion-1.jpg" alt="Everything Florence wholesale collection" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-center">
               <div>
-                <p className="text-lg font-medium text-white/80 mb-2">SUMMER SALE</p>
-                <h2 className="text-5xl font-semibold text-white mb-2">50% OFF</h2>
-                <p className="text-md font-medium text-white/80 mb-6">WITH PROMOTE CODE: 12D34E</p>
-                <Link to="/shop">
-                  <Button variant="primary" className="bg-white text-cdark-900 hover:bg-cdark-100">
-                    Shop Now
-                  </Button>
-                </Link>
+                <p className="text-lg font-medium text-white/80 mb-2">WHOLESALE COLLECTION</p>
+                <h2 className="text-4xl md:text-5xl font-semibold text-white mb-2">Shop Trending Stock for Resale</h2>
+                <p className="text-md font-medium text-white/80 mb-6">
+                  Visit our store, order on WhatsApp, and subscribe for promotion alerts.
+                </p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <Link to="/shop">
+                    <Button variant="primary" className="bg-white text-cdark-900 hover:bg-cdark-100">
+                      Browse Products
+                    </Button>
+                  </Link>
+                  <a href={BUSINESS_DETAILS.mapUrl} target="_blank" rel="noreferrer">
+                    <Button variant="secondary" className="border border-white/40 bg-white/10 text-white hover:bg-white/20">
+                      Find the Store
+                    </Button>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -195,10 +252,10 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { icon: "/images/section/icon-ship.svg", title: "Free Shipping", desc: "On orders over $50" },
-              { icon: "/images/section/icon-return.svg", title: "Easy Returns", desc: "60-day return policy" },
-              { icon: "/images/section/icon-quality.svg", title: "Quality Guarantee", desc: "Premium products only" },
-              { icon: "/images/section/icon-prices.svg", title: "Best Prices", desc: "Competitive pricing" },
+              { icon: "/images/section/icon-shop.svg", title: "Wholesale Ready", desc: "Built for bulk buyers, vendors, and resellers." },
+              { icon: "/images/section/icon-ship.svg", title: "Fast Ordering", desc: "Shop online or place quick orders on WhatsApp." },
+              { icon: "/images/section/icon-quality.svg", title: "Everyday Bestsellers", desc: "Popular items across fashion and home essentials." },
+              { icon: "/images/section/icon-prices.svg", title: "Reseller Pricing", desc: "Competitive rates for profitable restocking." },
             ].map((feature) => (
               <div key={feature.title} className="flex flex-col items-center text-center">
                 <img src={feature.icon} alt={feature.title} className="w-12 h-12 mb-3" />
@@ -213,11 +270,23 @@ export default function Home() {
       {/* Newsletter */}
       <section className="py-16">
         <div className="container mx-auto px-4 text-center">
-          <h4 className="text-2xl font-semibold mb-3">Sign Up to Our Newsletter</h4>
-          <p className="text-cdark-500 mb-6">Be the first to get the latest news about trends, promotions, and much more!</p>
-          <form className="flex max-w-md mx-auto">
+          <h4 className="text-2xl font-semibold mb-3">Join Our Promo Mailing List</h4>
+          <p className="text-cdark-500 mb-6">
+            Subscribe for wholesale promo updates, restocks, and fresh product drops from Everything Florence.
+          </p>
+          <form
+            action={BUSINESS_DETAILS.newsletterActionUrl}
+            method="post"
+            target="_blank"
+            className="flex max-w-md mx-auto"
+          >
+            <input type="hidden" name="form_type" value="customer" />
+            <input type="hidden" name="utf8" value={"✓"} />
+            <input type="hidden" name="contact[tags]" value="newsletter,website" />
             <input
               type="email"
+              name="contact[email]"
+              required
               placeholder="Email address"
               className="flex-1 px-4 py-3 rounded-l-lg border border-cdark-200 text-sm focus:outline-none focus:border-cblue-500"
             />
@@ -225,6 +294,9 @@ export default function Home() {
               Subscribe
             </button>
           </form>
+          <div className="mt-6 flex justify-center">
+            <SocialLinks />
+          </div>
         </div>
       </section>
     </div>
