@@ -1,15 +1,21 @@
 <svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="32" y1="24" x2="224" y2="232" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FF4A5E"/>
-      <stop offset="1" stop-color="#C81E37"/>
+    <linearGradient id="gold" x1="64" y1="48" x2="184" y2="212" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE27A"/>
+      <stop offset="0.55" stop-color="#F9C62A"/>
+      <stop offset="1" stop-color="#D89400"/>
     </linearGradient>
-    <linearGradient id="accent" x1="86" y1="66" x2="174" y2="190" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFD85A"/>
-      <stop offset="1" stop-color="#F4AF00"/>
+    <linearGradient id="red" x1="72" y1="176" x2="184" y2="204" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF586D"/>
+      <stop offset="1" stop-color="#D81F3E"/>
     </linearGradient>
   </defs>
-  <rect x="16" y="16" width="224" height="224" rx="56" fill="url(#bg)"/>
-  <path d="M84 68H174V92H112V116H164V139H112V188H84V68Z" fill="url(#accent)"/>
-  <path d="M142 68H170C193 68 208 79 208 101C208 119 197 131 178 134L210 188H178L150 139H142V188H114V68H142ZM142 92V117H169C177 117 181 112 181 104C181 96 176 92 167 92H142Z" fill="url(#accent)"/>
+  <rect x="16" y="16" width="224" height="224" rx="56" fill="#180B05"/>
+  <rect x="22" y="22" width="212" height="212" rx="50" stroke="url(#gold)" stroke-width="4" opacity="0.55"/>
+
+  <path d="M62 60H132V82H88V108H125V128H88V154H132V176H62V60Z" fill="url(#gold)"/>
+  <path d="M146 60H194V82H172V107H191V127H172V176H146V60Z" fill="url(#gold)"/>
+  <path d="M146 154H168V176H198V196H146V154Z" fill="url(#gold)"/>
+
+  <path d="M64 190C98 182 136 181 192 188" stroke="url(#red)" stroke-width="10" stroke-linecap="round"/>
 </svg>
