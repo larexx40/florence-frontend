@@ -49,7 +49,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero Slider */}
-      <section className="relative h-[600px] md:h-[700px] overflow-hidden bg-cdark-900">
+      <section className="relative h-[520px] sm:h-[620px] md:h-[700px] overflow-hidden bg-cdark-900">
         {heroSlides.map((s, idx) => (
           <div
             key={s.id}
@@ -58,25 +58,34 @@ export default function Home() {
               idx === currentSlide ? "opacity-100 pointer-events-auto z-10" : "opacity-0 pointer-events-none z-0"
             )}
           >
-            <img src={s.image} alt={s.heading} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/30" />
+            <img
+              src={s.image}
+              alt={s.heading}
+              className={cn(
+                "w-full h-full object-cover",
+                idx === 0 && "object-[72%_center] sm:object-center",
+                idx === 1 && "object-[68%_center] sm:object-center",
+                idx === 2 && "object-[92%_center] sm:object-center"
+              )}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-black/20 sm:bg-black/30" />
             <div className={cn(
-              "absolute inset-0 flex items-center",
+              "absolute inset-0 flex items-end sm:items-center",
               s.alignment === "right" ? "justify-end" : "justify-start"
             )}>
-              <div className="container mx-auto px-4">
+              <div className="container mx-auto px-4 pb-12 sm:pb-0">
                 <div className={cn(
-                  "max-w-lg",
+                  "max-w-sm rounded-2xl bg-black/30 p-5 backdrop-blur-[2px] sm:max-w-lg sm:rounded-none sm:bg-transparent sm:p-0 sm:backdrop-blur-0",
                   s.alignment === "right" && "ml-auto"
                 )}>
-                  <p className="mb-3 text-sm font-semibold uppercase tracking-[0.28em] text-white/70">Wholesale Store in Ibadan</p>
-                  <h2 className="text-4xl md:text-6xl font-semibold text-white mb-4">
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70 sm:mb-3 sm:text-sm sm:tracking-[0.28em]">Wholesale Store in Ibadan</p>
+                  <h2 className="text-3xl sm:text-4xl md:text-6xl font-semibold text-white mb-3 sm:mb-4">
                     Everything Florence
                   </h2>
-                  <p className="text-lg text-white/80 mb-3">{BUSINESS_DETAILS.description}</p>
-                  <p className="text-sm text-white/70 mb-6">{BUSINESS_DETAILS.productSummary}</p>
+                  <p className="text-sm sm:text-lg text-white/80 mb-2 sm:mb-3">{BUSINESS_DETAILS.description}</p>
+                  <p className="text-xs sm:text-sm text-white/70 mb-5 sm:mb-6">{BUSINESS_DETAILS.productSummary}</p>
                   <Link to="/shop">
-                    <Button variant="primary" className="bg-white text-cdark-900 hover:bg-cdark-100">
+                    <Button variant="primary" className="w-full sm:w-auto bg-white text-cdark-900 hover:bg-cdark-100">
                       Shop Now
                       <Icon icon={HEROICONS.ARROW_RIGHT} size={16} />
                     </Button>
@@ -281,7 +290,7 @@ export default function Home() {
             className="flex max-w-md mx-auto"
           >
             <input type="hidden" name="form_type" value="customer" />
-            <input type="hidden" name="utf8" value={"✓"} />
+            <input type="hidden" name="utf8" value="true" />
             <input type="hidden" name="contact[tags]" value="newsletter,website" />
             <input
               type="email"
