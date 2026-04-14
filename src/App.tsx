@@ -9,6 +9,7 @@ import ProductDetail from "@/pages/product/product-detail"
 import About from "@/pages/about/about"
 import Contact from "@/pages/contact/contact"
 import Login from "@/pages/auth/login"
+import ForgotPassword from "@/pages/auth/forgot-password"
 import AdminDashboard from "@/pages/admin/dashboard/admin-dashboard"
 import AdminProducts from "@/pages/admin/products/admin-products"
 import AdminOrders from "@/pages/admin/orders/admin-orders"
@@ -16,6 +17,8 @@ import AdminUsers from "@/pages/admin/users/admin-users"
 import AdminCategories from "@/pages/admin/categories/admin-categories"
 import AdminCoupons from "@/pages/admin/coupons/admin-coupons"
 import AdminSettings from "@/pages/admin/settings/admin-settings"
+import Account from "@/pages/account/account"
+import ProtectedRoute from "@/components/auth/protected-route"
 
 export default function App() {
   return (
@@ -23,12 +26,14 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route element={<RootLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/product/:slug" element={<ProductDetail />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           </Route>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />

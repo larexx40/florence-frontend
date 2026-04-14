@@ -1,0 +1,6489 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_hello",
+        "summary": "Health check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "AppController_healthCheck",
+        "summary": "Health check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "summary": "Login with email and password",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful. isProfileComplete=false means the user must complete first-time profile setup.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Login successful"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/LoginResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials or inactive account"
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "operationId": "AuthController_forgotPassword",
+        "summary": "Request a password reset email",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Same response regardless of whether the email is registered (prevents email enumeration)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "If that email is registered, a reset link has been sent"
+                    },
+                    "data": {
+                      "type": "object",
+                      "nullable": true,
+                      "example": null
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "operationId": "AuthController_resetPassword",
+        "summary": "Reset password using the token received by email",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Password reset successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "nullable": true,
+                      "example": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid/expired token or passwords do not match"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/refresh-token": {
+      "post": {
+        "operationId": "AuthController_refreshToken",
+        "summary": "Refresh access token using a valid refresh token",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New access token returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Token refreshed successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RefreshTokenDataDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired refresh token"
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/products": {
+      "get": {
+        "operationId": "ProductController_getAll",
+        "summary": "List all active products with search, sort, filter, and pagination",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "bag",
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "uuid-of-category",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "createdAt",
+              "enum": [
+                "name",
+                "createdAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "20",
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeInactive",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "all",
+            "required": false,
+            "in": "query",
+            "description": "true = return all records without pagination",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Products returned"
+          }
+        },
+        "tags": [
+          "products"
+        ]
+      },
+      "post": {
+        "operationId": "ProductController_create",
+        "summary": "Create a new product (admin only)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product created"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Category or discount not found"
+          },
+          "409": {
+            "description": "Slug already in use"
+          }
+        },
+        "tags": [
+          "products"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/products/{slug}": {
+      "get": {
+        "operationId": "ProductController_getBySlug",
+        "summary": "Get full product detail by slug including options and variants",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "bflo-226",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product returned"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/products/{id}": {
+      "patch": {
+        "operationId": "ProductController_update",
+        "summary": "Update a product (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product updated"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Product not found"
+          },
+          "409": {
+            "description": "Slug already in use"
+          }
+        },
+        "tags": [
+          "products"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "ProductController_remove",
+        "summary": "Deactivate a product (admin only) — soft delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product deactivated"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "tags": [
+          "products"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/products/{id}/images": {
+      "post": {
+        "operationId": "ProductController_attachImage",
+        "summary": "Attach an image to a product (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachImageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Image attached"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Product or image not found"
+          }
+        },
+        "tags": [
+          "products"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/products/{id}/images/{imageId}": {
+      "delete": {
+        "operationId": "ProductController_detachImage",
+        "summary": "Detach an image from a product (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "imageId",
+            "required": true,
+            "in": "path",
+            "description": "Image UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image detached"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Product or image link not found"
+          }
+        },
+        "tags": [
+          "products"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/products/{productId}/options": {
+      "get": {
+        "operationId": "OptionController_getOptions",
+        "summary": "List all options for a product (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Options returned"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "tags": [
+          "product options"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "OptionController_addOption",
+        "summary": "Add a global option to a product (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddProductOptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Option added"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "404": {
+            "description": "Product not found"
+          },
+          "409": {
+            "description": "Option already added to this product"
+          }
+        },
+        "tags": [
+          "product options"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/products/{productId}/options/{productOptionId}": {
+      "patch": {
+        "operationId": "OptionController_updateOption",
+        "summary": "Update option position on a product (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productOptionId",
+            "required": true,
+            "in": "path",
+            "description": "ProductOption UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductOptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Option updated"
+          },
+          "404": {
+            "description": "Option not found on this product"
+          }
+        },
+        "tags": [
+          "product options"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "OptionController_removeOption",
+        "summary": "Remove an option from a product (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productOptionId",
+            "required": true,
+            "in": "path",
+            "description": "ProductOption UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Option removed"
+          },
+          "400": {
+            "description": "Variants are using this option — delete them first"
+          },
+          "404": {
+            "description": "Option not found on this product"
+          }
+        },
+        "tags": [
+          "product options"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/products/{productId}/options/{productOptionId}/values": {
+      "post": {
+        "operationId": "OptionController_addValue",
+        "summary": "Add a value to a product option (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productOptionId",
+            "required": true,
+            "in": "path",
+            "description": "ProductOption UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOptionValueDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Value added"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "404": {
+            "description": "Product or option not found"
+          },
+          "409": {
+            "description": "Value already exists for this option"
+          }
+        },
+        "tags": [
+          "product options"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/products/{productId}/options/{productOptionId}/values/{valueId}": {
+      "patch": {
+        "operationId": "OptionController_updateValue",
+        "summary": "Update an option value (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productOptionId",
+            "required": true,
+            "in": "path",
+            "description": "ProductOption UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueId",
+            "required": true,
+            "in": "path",
+            "description": "OptionValue UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOptionValueDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Value updated"
+          },
+          "404": {
+            "description": "Value not found"
+          }
+        },
+        "tags": [
+          "product options"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "OptionController_removeValue",
+        "summary": "Delete an option value (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productOptionId",
+            "required": true,
+            "in": "path",
+            "description": "ProductOption UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueId",
+            "required": true,
+            "in": "path",
+            "description": "OptionValue UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Value deleted"
+          },
+          "400": {
+            "description": "A variant is using this value — delete the variant first"
+          },
+          "404": {
+            "description": "Value not found"
+          }
+        },
+        "tags": [
+          "product options"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/products/{productId}/variants": {
+      "get": {
+        "operationId": "VariantController_getAll",
+        "summary": "List variants for a product with sort, filter, and pagination",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "asc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "price",
+              "enum": [
+                "price",
+                "createdAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "inStock",
+            "required": false,
+            "in": "query",
+            "description": "true = only return variants with stock > 0",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "includeInactive",
+            "required": false,
+            "in": "query",
+            "description": "Admin only — include inactive variants",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "20",
+              "type": "string"
+            }
+          },
+          {
+            "name": "all",
+            "required": false,
+            "in": "query",
+            "description": "true = return all records without pagination",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Variants returned"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "tags": [
+          "product variants"
+        ]
+      },
+      "post": {
+        "operationId": "VariantController_create",
+        "summary": "Create a variant for a product (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVariantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Variant created"
+          },
+          "400": {
+            "description": "Invalid option value IDs or duplicate combination"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Product not found"
+          },
+          "409": {
+            "description": "SKU already in use or combination already exists"
+          }
+        },
+        "tags": [
+          "product variants"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/products/{productId}/variants/{variantId}": {
+      "patch": {
+        "operationId": "VariantController_update",
+        "summary": "Update a variant (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "variantId",
+            "required": true,
+            "in": "path",
+            "description": "Variant UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVariantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Variant updated"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Variant not found"
+          },
+          "409": {
+            "description": "SKU already in use"
+          }
+        },
+        "tags": [
+          "product variants"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "VariantController_remove",
+        "summary": "Delete or deactivate a variant (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "variantId",
+            "required": true,
+            "in": "path",
+            "description": "Variant UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Variant deleted or deactivated"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Variant not found"
+          }
+        },
+        "tags": [
+          "product variants"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/products/{productId}/variants/{variantId}/stock": {
+      "patch": {
+        "operationId": "VariantController_updateStock",
+        "summary": "Set stock quantity for a variant (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "variantId",
+            "required": true,
+            "in": "path",
+            "description": "Variant UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStockDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stock updated"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Variant not found"
+          }
+        },
+        "tags": [
+          "product variants"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/products/{productId}/variants/{variantId}/images": {
+      "post": {
+        "operationId": "VariantController_attachImage",
+        "summary": "Attach an image to a variant (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "variantId",
+            "required": true,
+            "in": "path",
+            "description": "Variant UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachImageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Image attached"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Variant or image not found"
+          }
+        },
+        "tags": [
+          "product variants"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/products/{productId}/variants/{variantId}/images/{imageId}": {
+      "delete": {
+        "operationId": "VariantController_detachImage",
+        "summary": "Detach an image from a variant (admin only)",
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "variantId",
+            "required": true,
+            "in": "path",
+            "description": "Variant UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "imageId",
+            "required": true,
+            "in": "path",
+            "description": "Image UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image detached"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Variant or image link not found"
+          }
+        },
+        "tags": [
+          "product variants"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/categories": {
+      "get": {
+        "operationId": "CategoryController_getAll",
+        "summary": "List categories with search, sort, filter, and pagination",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "bags",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "name",
+              "enum": [
+                "name",
+                "createdAt"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "asc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "parentId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by parent category",
+            "schema": {
+              "example": "uuid-of-parent",
+              "type": "string"
+            }
+          },
+          {
+            "name": "rootOnly",
+            "required": false,
+            "in": "query",
+            "description": "true = return only root categories (no parent)",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "includeInactive",
+            "required": false,
+            "in": "query",
+            "description": "Admin only — include inactive categories",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "20",
+              "type": "string"
+            }
+          },
+          {
+            "name": "all",
+            "required": false,
+            "in": "query",
+            "description": "true = return all records without pagination",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categories returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Categories fetched successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryListResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "categories"
+        ]
+      },
+      "post": {
+        "operationId": "CategoryController_create",
+        "summary": "Create a category (admin only)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Category created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Category created successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Parent category not found"
+          },
+          "409": {
+            "description": "Slug already in use"
+          }
+        },
+        "tags": [
+          "categories"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/categories/tree": {
+      "get": {
+        "operationId": "CategoryController_getTree",
+        "summary": "Get full nested tree: root categories → subcategories → sub-subcategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Category tree returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Category tree fetched successfully"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CategoryTreeResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "categories"
+        ]
+      }
+    },
+    "/categories/{slug}": {
+      "get": {
+        "operationId": "CategoryController_getBySlug",
+        "summary": "Get a category by slug with its subcategories",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "bags",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Category fetched successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "tags": [
+          "categories"
+        ]
+      }
+    },
+    "/categories/{id}": {
+      "patch": {
+        "operationId": "CategoryController_update",
+        "summary": "Update a category (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Category UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Category updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Category updated successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or circular parent reference"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Category or parent not found"
+          },
+          "409": {
+            "description": "Slug already in use"
+          }
+        },
+        "tags": [
+          "categories"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "CategoryController_remove",
+        "summary": "Delete or deactivate a category (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Category UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category deleted or deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Category deleted successfully"
+                    },
+                    "data": {
+                      "type": "null",
+                      "example": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "tags": [
+          "categories"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/locations/states": {
+      "get": {
+        "operationId": "LocationController_getStates",
+        "summary": "Get all states",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "States fetched successfully"
+          }
+        },
+        "tags": [
+          "locations"
+        ]
+      },
+      "post": {
+        "operationId": "LocationController_createState",
+        "summary": "Create a new state (admin only)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "State created successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "409": {
+            "description": "State already exists"
+          }
+        },
+        "tags": [
+          "locations"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/locations/states/{stateId}": {
+      "get": {
+        "operationId": "LocationController_getState",
+        "summary": "Get a single state by ID",
+        "parameters": [
+          {
+            "name": "stateId",
+            "required": true,
+            "in": "path",
+            "description": "State UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "State fetched successfully"
+          },
+          "404": {
+            "description": "State not found"
+          }
+        },
+        "tags": [
+          "locations"
+        ]
+      }
+    },
+    "/locations/states/{stateId}/cities": {
+      "get": {
+        "operationId": "LocationController_getCitiesByState",
+        "summary": "Get all cities in a state",
+        "parameters": [
+          {
+            "name": "stateId",
+            "required": true,
+            "in": "path",
+            "description": "State UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cities fetched successfully"
+          },
+          "404": {
+            "description": "State not found"
+          }
+        },
+        "tags": [
+          "locations"
+        ]
+      },
+      "post": {
+        "operationId": "LocationController_createCity",
+        "summary": "Add a city to a state (admin only)",
+        "parameters": [
+          {
+            "name": "stateId",
+            "required": true,
+            "in": "path",
+            "description": "State UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "City created successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "State not found"
+          },
+          "409": {
+            "description": "City already exists in this state"
+          }
+        },
+        "tags": [
+          "locations"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/locations/cities/{cityId}/lgas": {
+      "get": {
+        "operationId": "LocationController_getLGAsByCity",
+        "summary": "Get all LGAs in a city",
+        "parameters": [
+          {
+            "name": "cityId",
+            "required": true,
+            "in": "path",
+            "description": "City UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "LGAs fetched successfully"
+          },
+          "404": {
+            "description": "City not found"
+          }
+        },
+        "tags": [
+          "locations"
+        ]
+      },
+      "post": {
+        "operationId": "LocationController_createLGA",
+        "summary": "Add an LGA to a city (admin only)",
+        "parameters": [
+          {
+            "name": "cityId",
+            "required": true,
+            "in": "path",
+            "description": "City UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLgaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "LGA created successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "City not found"
+          }
+        },
+        "tags": [
+          "locations"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/logistics/by-city/{cityId}": {
+      "get": {
+        "operationId": "LogisticsController_getByCity",
+        "summary": "Get active logistics companies that cover a specific city",
+        "parameters": [
+          {
+            "name": "cityId",
+            "required": true,
+            "in": "path",
+            "description": "City UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Logistics companies available in Lagos Island, Lagos"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LogisticsCompanyResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "City not found"
+          }
+        },
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics/by-state/{stateId}": {
+      "get": {
+        "operationId": "LogisticsController_getByState",
+        "summary": "Get active logistics companies that cover any city in a state",
+        "parameters": [
+          {
+            "name": "stateId",
+            "required": true,
+            "in": "path",
+            "description": "State UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Logistics companies available in Lagos"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LogisticsCompanyResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "State not found"
+          }
+        },
+        "tags": [
+          "logistics"
+        ]
+      }
+    },
+    "/logistics": {
+      "get": {
+        "operationId": "LogisticsController_getAll",
+        "summary": "List all logistics companies with search and pagination (admin only)",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "20",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "swift",
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeInactive",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Logistics companies fetched successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/LogisticsListResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          }
+        },
+        "tags": [
+          "logistics"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "LogisticsController_create",
+        "summary": "Create a logistics company (admin only)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLogisticsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Logistics company created successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/LogisticsCompanyResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "409": {
+            "description": "Company name already exists"
+          }
+        },
+        "tags": [
+          "logistics"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/logistics/{id}": {
+      "get": {
+        "operationId": "LogisticsController_getById",
+        "summary": "Get a logistics company by ID (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Logistics company UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Logistics company fetched successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/LogisticsCompanyResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "Logistics company not found"
+          }
+        },
+        "tags": [
+          "logistics"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "LogisticsController_update",
+        "summary": "Update a logistics company (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Logistics company UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLogisticsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Logistics company updated successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/LogisticsCompanyResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "Logistics company not found"
+          },
+          "409": {
+            "description": "Company name already taken"
+          }
+        },
+        "tags": [
+          "logistics"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "LogisticsController_remove",
+        "summary": "Delete or deactivate a logistics company (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Logistics company UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Logistics company deleted successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "nullable": true,
+                      "example": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "Logistics company not found"
+          }
+        },
+        "tags": [
+          "logistics"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/logistics/{id}/coverage": {
+      "post": {
+        "operationId": "LogisticsController_addCoverage",
+        "summary": "Add a coverage area to a logistics company (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Logistics company UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddCoverageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Coverage area added successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CoverageResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "Logistics company, city, or LGA not found"
+          },
+          "409": {
+            "description": "Coverage for this city already exists"
+          }
+        },
+        "tags": [
+          "logistics"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/logistics/{id}/coverage/{coverageId}": {
+      "delete": {
+        "operationId": "LogisticsController_removeCoverage",
+        "summary": "Remove a coverage area from a logistics company (admin only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Logistics company UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "coverageId",
+            "required": true,
+            "in": "path",
+            "description": "Coverage UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Coverage area removed successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "nullable": true,
+                      "example": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "Coverage area not found"
+          }
+        },
+        "tags": [
+          "logistics"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/shipping-addresses": {
+      "get": {
+        "operationId": "ShippingAddressController_getUserShippingAddresses",
+        "summary": "Get the authenticated user's shipping addresses",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Shipping addresses fetched successfully"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ShippingAddressResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "shipping-addresses"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "ShippingAddressController_createShippingAddress",
+        "summary": "Add a new shipping address",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateShippingAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Shipping address added successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ShippingAddressResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "City not found"
+          }
+        },
+        "tags": [
+          "shipping-addresses"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/shipping-addresses/{id}": {
+      "get": {
+        "operationId": "ShippingAddressController_getShippingAddress",
+        "summary": "Get a specific shipping address",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipping address UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Shipping address fetched successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ShippingAddressResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — not your address"
+          },
+          "404": {
+            "description": "Shipping address not found"
+          }
+        },
+        "tags": [
+          "shipping-addresses"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "ShippingAddressController_updateShippingAddress",
+        "summary": "Update a shipping address",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipping address UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateShippingAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Shipping address updated successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ShippingAddressResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — not your address"
+          },
+          "404": {
+            "description": "Shipping address or city not found"
+          }
+        },
+        "tags": [
+          "shipping-addresses"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "ShippingAddressController_deleteShippingAddress",
+        "summary": "Delete a shipping address",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipping address UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Shipping address deleted successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "nullable": true,
+                      "example": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — not your address"
+          },
+          "404": {
+            "description": "Shipping address not found"
+          }
+        },
+        "tags": [
+          "shipping-addresses"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/shipping-addresses/{id}/default": {
+      "patch": {
+        "operationId": "ShippingAddressController_setDefaultShippingAddress",
+        "summary": "Set a shipping address as the default",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Shipping address UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Default shipping address updated successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ShippingAddressResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — not your address"
+          },
+          "404": {
+            "description": "Shipping address not found"
+          }
+        },
+        "tags": [
+          "shipping-addresses"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/shipping-addresses/by-email": {
+      "get": {
+        "operationId": "ShippingAddressController_getShippingAddressByUserEmail",
+        "summary": "Look up a user's shipping addresses by email — returns [] when email not found (staff only)",
+        "parameters": [
+          {
+            "name": "email",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "jane@example.com",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Shipping addresses fetched successfully"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ShippingAddressResponseDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Staff access required"
+          }
+        },
+        "tags": [
+          "shipping-addresses"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/seed/run": {
+      "post": {
+        "operationId": "SeedController_runSeed",
+        "summary": "Trigger database seed via API",
+        "parameters": [
+          {
+            "name": "x-seed-secret",
+            "required": true,
+            "in": "header",
+            "description": "Must match SEED_API_KEY from the server environment",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "description": "Optional custom users to seed. If omitted, default users are seeded.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunSeedDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Seed completed successfully"
+          },
+          "401": {
+            "description": "Invalid seed secret"
+          },
+          "500": {
+            "description": "Seed API key is not configured"
+          }
+        },
+        "tags": [
+          "seed"
+        ]
+      }
+    },
+    "/seed/category": {
+      "post": {
+        "operationId": "SeedController_seedCategories",
+        "summary": "Seed categories from the Shopify snapshot JSON",
+        "parameters": [
+          {
+            "name": "x-seed-secret",
+            "required": true,
+            "in": "header",
+            "description": "Must match SEED_API_KEY from the server environment",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "description": "No body required. Reads prisma/data/shopify-data.json.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeedShopifyCategoriesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category seed completed successfully"
+          }
+        },
+        "tags": [
+          "seed"
+        ]
+      }
+    },
+    "/seed/products": {
+      "post": {
+        "operationId": "SeedController_seedProducts",
+        "summary": "Seed products, options, values, variants, and product images from the Shopify snapshot JSON",
+        "parameters": [
+          {
+            "name": "x-seed-secret",
+            "required": true,
+            "in": "header",
+            "description": "Must match SEED_API_KEY from the server environment",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "description": "No body required. Reads prisma/data/shopify-data.json.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeedShopifyProductsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product seed completed successfully"
+          }
+        },
+        "tags": [
+          "seed"
+        ]
+      }
+    },
+    "/admin/profile": {
+      "get": {
+        "operationId": "AdminController_getProfile",
+        "summary": "Get own admin profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Admin profile returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Profile fetched successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Staff access required"
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/admin/update-profile": {
+      "post": {
+        "operationId": "AdminController_updateProfile",
+        "summary": "Update own profile and set password (first-time setup)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNewAdminProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Admin profile updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Profile updated successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Staff access required"
+          },
+          "409": {
+            "description": "Phone number already in use"
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/admin/change-role": {
+      "post": {
+        "operationId": "AdminController_changeUserRole",
+        "summary": "Change a user's role (super admin only)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeUserRole"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User role updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User role updated successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Super admin only"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/admin/add-admin": {
+      "post": {
+        "operationId": "AdminController_addAdmin",
+        "summary": "Create a new admin account and email credentials (super admin only)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddAdminDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Admin account created and credentials emailed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Admin added successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Super admin only"
+          },
+          "409": {
+            "description": "Email already in use"
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/me": {
+      "get": {
+        "operationId": "UsersController_getProfile",
+        "summary": "Get own profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profile returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Profile fetched successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_updateProfile",
+        "summary": "Update own profile fields",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Profile updated successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "409": {
+            "description": "Phone number already in use"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/me/setup-account": {
+      "post": {
+        "operationId": "UsersController_setupAccount",
+        "summary": "First-time account setup — set password and complete profile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetupAccountDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Account set up successfully — profile is now complete",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Account set up successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error or passwords do not match"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "409": {
+            "description": "Phone number already in use"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/me/change-password": {
+      "post": {
+        "operationId": "UsersController_changePassword",
+        "summary": "Change own password (requires current password)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Password changed successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "nullable": true,
+                      "example": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Current password incorrect or passwords do not match"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users": {
+      "post": {
+        "operationId": "UsersController_createUser",
+        "summary": "Create a new user account",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User created successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "409": {
+            "description": "Email or phone already in use"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "UsersController_getAllUsers",
+        "summary": "List all users with optional filters and pagination",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "jane",
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "CUSTOMER",
+              "enum": [
+                "SUPER_ADMIN",
+                "CUSTOMER",
+                "ADMIN",
+                "SUPPORT",
+                "LOGISTICS"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "createdAt",
+              "enum": [
+                "createdAt",
+                "firstName",
+                "email",
+                "lastLogin"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated user list returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Users fetched successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UsersListResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Staff access required"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/{id}/store-credit": {
+      "post": {
+        "operationId": "UsersController_awardStoreCredit",
+        "summary": "Award store credit to a user",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AwardStoreCreditDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Store credit awarded and confirmation email sent to user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "₦500 store credit awarded successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "nullable": true,
+                      "example": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid amount"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/{id}/send-email": {
+      "post": {
+        "operationId": "UsersController_sendEmailToUser",
+        "summary": "Send a custom email to a user",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendUserEmailDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Email sent successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "nullable": true,
+                      "example": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/{id}/send-login-details": {
+      "post": {
+        "operationId": "UsersController_sendLoginDetails",
+        "summary": "Send first-time login credentials to a user (one-time, cannot be repeated)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login credentials emailed to user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Login details sent successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "nullable": true,
+                      "example": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Login details already sent to this user"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/{id}/toggle-active": {
+      "patch": {
+        "operationId": "UsersController_toggleUserActive",
+        "summary": "Activate or deactivate a user account",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account status toggled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User account activated successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cannot deactivate own account"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Admin access required"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "UsersController_getUserById",
+        "summary": "Get a single user by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User fetched successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Staff access required"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/{id}/stats": {
+      "get": {
+        "operationId": "UsersController_getUserStats",
+        "summary": "Get user spend stats: total orders, total spent, store credit balance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User stats returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User stats fetched successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserStatsResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Staff access required"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/{id}/orders": {
+      "get": {
+        "operationId": "UsersController_getUserOrders",
+        "summary": "Get paginated order history for a user",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated order list returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User orders fetched successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserOrdersResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Staff access required"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/{id}/transactions": {
+      "get": {
+        "operationId": "UsersController_getUserTransactions",
+        "summary": "Get paginated store credit transaction history for a user",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated transaction list returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User transactions fetched successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserTransactionsResponseDto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Staff access required"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/images/upload": {
+      "post": {
+        "operationId": "ImageController_upload",
+        "summary": "Upload an image file to S3 (staff only)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "altText": {
+                    "type": "string",
+                    "example": "Product front view"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Image uploaded and record created"
+          },
+          "400": {
+            "description": "No file provided or unsupported file type"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Staff access required"
+          }
+        },
+        "tags": [
+          "images"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/images/link": {
+      "post": {
+        "operationId": "ImageController_link",
+        "summary": "Link an existing S3 image URL — validates the object exists (staff only)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkImageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Image record created or existing record returned"
+          },
+          "400": {
+            "description": "Invalid URL or wrong bucket"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Staff access required"
+          },
+          "404": {
+            "description": "S3 object not found at the given URL"
+          }
+        },
+        "tags": [
+          "images"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/checkout/resolve-shipping": {
+      "post": {
+        "operationId": "CheckoutController_resolveShipping",
+        "summary": "Resolve delivery addresses and available logistics for a customer email",
+        "description": "Step 1 of checkout. Supply the customer email to get:\n  • addresses — all saved delivery addresses (empty if email unknown)\n  • selected  — the default or explicitly chosen address\n  • logistics — active logistics companies covering the selected address city\n\nIf no addressId is given the default address is pre-selected automatically.\nPass an addressId to switch to a different address.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveShippingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Shipping options resolved successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "example": "uuid"
+                            },
+                            "isNew": {
+                              "type": "boolean",
+                              "example": false
+                            }
+                          }
+                        },
+                        "addresses": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ShippingAddressResponseDto"
+                          }
+                        },
+                        "selected": {
+                          "oneOf": [
+                            {
+                              "$ref": "#/components/schemas/ShippingAddressResponseDto"
+                            },
+                            {
+                              "type": "object",
+                              "nullable": true,
+                              "example": null
+                            }
+                          ]
+                        },
+                        "logistics": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/LogisticsCompanyResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "404": {
+            "description": "addressId provided but not found for this user"
+          }
+        },
+        "tags": [
+          "checkout"
+        ]
+      }
+    },
+    "/checkout/place-order": {
+      "post": {
+        "operationId": "CheckoutController_placeOrder",
+        "summary": "Place an order",
+        "description": "Step 2 of checkout. Creates the order and returns payment info.\n\nPayment methods:\n  • PAYSTACK — returns authorization_url and access_code for redirect\n  • CASH_ON_DELIVERY — in-store pickup; no logistics required\n\nA customer account is automatically created if the email does not exist.\nSupply either addressId (existing address) or an inline address object.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Order ORD-20260413-AB12 placed successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "order": {
+                          "type": "object",
+                          "description": "Created order with items and address"
+                        },
+                        "paystackUrl": {
+                          "type": "string",
+                          "nullable": true,
+                          "example": "https://checkout.paystack.com/..."
+                        },
+                        "accessCode": {
+                          "type": "string",
+                          "nullable": true,
+                          "example": "abc123xyz"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input, insufficient stock, or business rule violation"
+          },
+          "404": {
+            "description": "Address, variant, or logistics not found"
+          },
+          "500": {
+            "description": "Paystack initialization failed after order was created"
+          }
+        },
+        "tags": [
+          "checkout"
+        ]
+      }
+    },
+    "/orders": {
+      "get": {
+        "operationId": "OrderController_getAll",
+        "summary": "List all orders with optional filters (staff/admin)",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "PENDING",
+                "CONFIRMED",
+                "PROCESSING",
+                "SHIPPED",
+                "DELIVERED",
+                "CANCELLED",
+                "PARTIALLY_FULFILLED",
+                "REFUNDED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentStatus",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "UNPAID",
+                "PAID",
+                "PARTIAL",
+                "REFUNDED",
+                "CREDITED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "paymentMethod",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "PAYSTACK",
+                "BANK_TRANSFER",
+                "CASH_ON_DELIVERY"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search by order number (partial match)",
+            "schema": {
+              "example": "ORD-20260413",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of orders"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "tags": [
+          "orders"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "operationId": "OrderController_getOne",
+        "summary": "Get a single order by ID (staff/admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Order UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order detail"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        },
+        "tags": [
+          "orders"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/orders/{id}/status": {
+      "patch": {
+        "operationId": "OrderController_updateStatus",
+        "summary": "Update order status or payment status (admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Order UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrderStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order updated"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — admin only"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        },
+        "tags": [
+          "orders"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/orders/{id}/receipt": {
+      "get": {
+        "operationId": "OrderController_getReceipt",
+        "summary": "Get printable thermal receipt for an order (staff/admin)",
+        "description": "Returns an HTML page formatted for an 80mm thermal printer. Open in browser and use Ctrl+P / Cmd+P, or click the on-page Print button.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Order UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML receipt page"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        },
+        "tags": [
+          "orders"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Florence API",
+    "description": "Florence vendor e-commerce backend API",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "email": {
+            "type": "string",
+            "example": "jane@example.com"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Jane",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678",
+            "nullable": true
+          },
+          "businessName": {
+            "type": "string",
+            "example": "Acme Ltd",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "SUPER_ADMIN",
+              "CUSTOMER",
+              "ADMIN",
+              "SUPPORT",
+              "LOGISTICS"
+            ],
+            "example": "CUSTOMER"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "isProfileComplete": {
+            "type": "boolean",
+            "example": false,
+            "description": "True once the user has completed first-time account setup"
+          },
+          "isEmailVerified": {
+            "type": "boolean",
+            "example": false
+          },
+          "storeCreditBalance": {
+            "type": "number",
+            "example": 0,
+            "description": "Current store credit balance in Naira"
+          },
+          "loginDetailsSent": {
+            "type": "boolean",
+            "example": false,
+            "description": "True once admin has sent first-time login credentials (one-time action)"
+          },
+          "lastLogin": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2025-01-15T10:30:00.000Z",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2025-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2025-01-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "isActive",
+          "isProfileComplete",
+          "isEmailVerified",
+          "storeCreditBalance",
+          "loginDetailsSent",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "refreshToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "isVerified": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether the user has verified their email"
+          },
+          "isProfileComplete": {
+            "type": "boolean",
+            "example": false,
+            "description": "false = first login, prompt user to complete profile setup"
+          }
+        },
+        "required": [
+          "user",
+          "accessToken",
+          "refreshToken",
+          "isVerified",
+          "isProfileComplete"
+        ]
+      },
+      "RefreshTokenDataDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        },
+        "required": [
+          "accessToken"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "P@ssword1!"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          },
+          "token": {
+            "type": "string",
+            "example": "a1b2c3d4e5f6..."
+          },
+          "password": {
+            "type": "string",
+            "example": "NewP@ssword1!",
+            "description": "Min 8 chars, uppercase, lowercase, number, special char"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "example": "NewP@ssword1!"
+          }
+        },
+        "required": [
+          "email",
+          "token",
+          "password",
+          "confirmPassword"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "CreateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "BFLO 226"
+          },
+          "description": {
+            "type": "string",
+            "example": "Premium quality bag in multiple colours"
+          },
+          "categoryId": {
+            "type": "string",
+            "example": "uuid-of-category"
+          },
+          "minOrderQty": {
+            "type": "number",
+            "example": 1,
+            "minimum": 1,
+            "description": "Minimum units per order"
+          },
+          "orderIncrement": {
+            "type": "number",
+            "example": 6,
+            "description": "Quantity must be a multiple of this value"
+          },
+          "prerequisiteVariantId": {
+            "type": "string",
+            "example": "uuid-of-variant",
+            "description": "Variant that must be in cart before others can be added"
+          },
+          "discountId": {
+            "type": "string",
+            "example": "uuid-of-discount"
+          }
+        },
+        "required": [
+          "name",
+          "categoryId"
+        ]
+      },
+      "UpdateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "BFLO 226 Updated"
+          },
+          "slug": {
+            "type": "string",
+            "example": "bflo-226-updated"
+          },
+          "description": {
+            "type": "string",
+            "example": "Updated description"
+          },
+          "categoryId": {
+            "type": "string",
+            "example": "uuid-of-category"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "minOrderQty": {
+            "type": "number",
+            "example": 1
+          },
+          "orderIncrement": {
+            "type": "number",
+            "example": 6
+          },
+          "prerequisiteVariantId": {
+            "type": "string",
+            "example": "uuid-of-variant"
+          },
+          "discountId": {
+            "type": "string",
+            "example": "uuid-of-discount"
+          }
+        }
+      },
+      "AttachImageDto": {
+        "type": "object",
+        "properties": {
+          "imageId": {
+            "type": "string",
+            "example": "uuid-of-image",
+            "description": "Image record UUID returned by /images/upload or /images/link"
+          },
+          "position": {
+            "type": "number",
+            "example": 0,
+            "minimum": 0,
+            "description": "Display position — lower = shown first"
+          }
+        },
+        "required": [
+          "imageId"
+        ]
+      },
+      "AddProductOptionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Color",
+            "description": "Global option name — created if it does not already exist"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Colour",
+            "description": "Display label shown in the UI"
+          },
+          "position": {
+            "type": "number",
+            "example": 0,
+            "description": "Display order of this option on the product page"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateProductOptionDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "example": "Colour"
+          },
+          "position": {
+            "type": "number",
+            "example": 1
+          }
+        }
+      },
+      "AddOptionValueDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "example": "Black"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Jet Black"
+          },
+          "position": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": [
+          "value"
+        ]
+      },
+      "UpdateOptionValueDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "example": "Jet Black"
+          },
+          "position": {
+            "type": "number",
+            "example": 1
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": false,
+            "description": "false = grey out this value in the selector UI"
+          }
+        }
+      },
+      "CreateVariantDto": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "example": "BFLO-226-BLACK"
+          },
+          "price": {
+            "type": "number",
+            "example": 14000
+          },
+          "compareAtPrice": {
+            "type": "number",
+            "example": 16000,
+            "description": "Original price before discount — shown as strikethrough"
+          },
+          "stockQty": {
+            "type": "number",
+            "example": 50,
+            "minimum": 0
+          },
+          "weightKg": {
+            "type": "number",
+            "example": 1.5,
+            "description": "Weight in kilograms"
+          },
+          "optionValueIds": {
+            "description": "Array of OptionValue IDs that define this variant combination. One ID per option.",
+            "example": [
+              "uuid-of-black-value"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "sku",
+          "price",
+          "optionValueIds"
+        ]
+      },
+      "UpdateVariantDto": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "example": "BFLO-226-BLACK-V2"
+          },
+          "price": {
+            "type": "number",
+            "example": 15000
+          },
+          "compareAtPrice": {
+            "type": "number",
+            "example": 17000
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "weightKg": {
+            "type": "number",
+            "example": 1.2
+          }
+        }
+      },
+      "UpdateStockDto": {
+        "type": "object",
+        "properties": {
+          "stockQty": {
+            "type": "number",
+            "example": 100,
+            "minimum": 0,
+            "description": "Absolute stock quantity to set"
+          }
+        },
+        "required": [
+          "stockQty"
+        ]
+      },
+      "SubcategoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Women's Shoes"
+          },
+          "slug": {
+            "type": "string",
+            "example": "womens-shoes"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://cdn.example.com/womens-shoes.jpg",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "isActive"
+        ]
+      },
+      "CategoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Shoes"
+          },
+          "slug": {
+            "type": "string",
+            "example": "shoes"
+          },
+          "description": {
+            "type": "string",
+            "example": "All shoe categories",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://cdn.example.com/shoes.jpg",
+            "nullable": true
+          },
+          "parentId": {
+            "type": "string",
+            "example": "uuid-of-parent",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "subcategories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubcategoryResponseDto"
+            }
+          },
+          "_count": {
+            "type": "object",
+            "example": {
+              "products": 12
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+          "subcategories",
+          "_count"
+        ]
+      },
+      "CategoryListResponseDto": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryResponseDto"
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "example": {
+              "totalData": 100,
+              "totalPages": 5,
+              "currentPage": 1,
+              "perPage": 20
+            }
+          }
+        },
+        "required": [
+          "categories",
+          "pagination"
+        ]
+      },
+      "CategoryTreeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Shoes"
+          },
+          "slug": {
+            "type": "string",
+            "example": "shoes"
+          },
+          "description": {
+            "type": "string",
+            "example": "All shoe categories",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://cdn.example.com/shoes.jpg",
+            "nullable": true
+          },
+          "parentId": {
+            "type": "string",
+            "example": "uuid-of-parent",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "_count": {
+            "type": "object",
+            "example": {
+              "products": 12
+            }
+          },
+          "subcategories": {
+            "description": "Nested subcategories (up to 3 levels)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryTreeResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+          "_count",
+          "subcategories"
+        ]
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Bags"
+          },
+          "description": {
+            "type": "string",
+            "example": "All types of wholesale bags"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://cdn.example.com/bags.jpg"
+          },
+          "parentId": {
+            "type": "string",
+            "example": "uuid-of-parent",
+            "description": "Parent category UUID — omit to create a root category"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Women Bags"
+          },
+          "slug": {
+            "type": "string",
+            "example": "women-bags"
+          },
+          "description": {
+            "type": "string",
+            "example": "Updated description"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://cdn.example.com/new.jpg"
+          },
+          "parentId": {
+            "type": "string",
+            "example": "uuid-of-parent"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "CreateStateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Lagos"
+          },
+          "capital": {
+            "type": "string",
+            "example": "Ikeja"
+          },
+          "latitude": {
+            "type": "number",
+            "example": 6.5244
+          },
+          "longitude": {
+            "type": "number",
+            "example": 3.3792
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateCityDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Ikeja"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateLgaDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Alimosho"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CoverageCityResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Lagos Island"
+          },
+          "state": {
+            "type": "object",
+            "example": {
+              "id": "uuid",
+              "name": "Lagos"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "state"
+        ]
+      },
+      "CoverageResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid"
+          },
+          "logisticsCompanyId": {
+            "type": "string",
+            "example": "uuid-of-company"
+          },
+          "city": {
+            "$ref": "#/components/schemas/CoverageCityResponseDto"
+          },
+          "localGovernment": {
+            "type": "object",
+            "example": {
+              "id": "uuid",
+              "name": "Eti-Osa"
+            },
+            "nullable": true
+          },
+          "shippingFee": {
+            "type": "number",
+            "example": 1500
+          }
+        },
+        "required": [
+          "id",
+          "logisticsCompanyId",
+          "city",
+          "shippingFee"
+        ]
+      },
+      "LogisticsCompanyResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Swift Logistics"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "example": "hello@swiftlogistics.ng",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "example": "Reliable next-day delivery",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "string",
+            "example": "https://cdn.example.com/swift-logo.png",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-01T00:00:00.000Z"
+          },
+          "coverages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoverageResponseDto"
+            }
+          },
+          "_count": {
+            "type": "object",
+            "example": {
+              "orders": 42
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+          "coverages",
+          "_count"
+        ]
+      },
+      "PaginatedDataDto": {
+        "type": "object",
+        "properties": {
+          "totalData": {
+            "type": "number",
+            "example": 100
+          },
+          "totalPages": {
+            "type": "number",
+            "example": 5
+          },
+          "currentPage": {
+            "type": "number",
+            "example": 1
+          },
+          "perPage": {
+            "type": "number",
+            "example": 20
+          }
+        },
+        "required": [
+          "totalData",
+          "totalPages",
+          "currentPage",
+          "perPage"
+        ]
+      },
+      "LogisticsListResponseDto": {
+        "type": "object",
+        "properties": {
+          "logistics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogisticsCompanyResponseDto"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginatedDataDto"
+          }
+        },
+        "required": [
+          "logistics",
+          "pagination"
+        ]
+      },
+      "CreateLogisticsDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Swift Logistics"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678"
+          },
+          "email": {
+            "type": "string",
+            "example": "hello@swiftlogistics.ng"
+          },
+          "description": {
+            "type": "string",
+            "example": "Reliable next-day delivery across Lagos"
+          },
+          "logoUrl": {
+            "type": "string",
+            "example": "https://cdn.example.com/swift-logo.png"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateLogisticsDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Swift Logistics NG"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678"
+          },
+          "email": {
+            "type": "string",
+            "example": "hello@swiftlogistics.ng"
+          },
+          "description": {
+            "type": "string",
+            "example": "Reliable next-day delivery across Lagos"
+          },
+          "logoUrl": {
+            "type": "string",
+            "example": "https://cdn.example.com/swift-logo.png"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "AddCoverageDto": {
+        "type": "object",
+        "properties": {
+          "cityId": {
+            "type": "string",
+            "example": "uuid-of-city"
+          },
+          "localGovernmentId": {
+            "type": "string",
+            "example": "uuid-of-lga"
+          },
+          "shippingFee": {
+            "type": "number",
+            "example": 1500,
+            "description": "Shipping fee in kobo or smallest currency unit"
+          }
+        },
+        "required": [
+          "cityId"
+        ]
+      },
+      "ShippingAddressResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "example": "uuid-of-user"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678"
+          },
+          "addressLine1": {
+            "type": "string",
+            "example": "12 Bode Thomas Street"
+          },
+          "addressLine2": {
+            "type": "string",
+            "example": "Surulere",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "example": "Lagos Island"
+          },
+          "state": {
+            "type": "string",
+            "example": "Lagos"
+          },
+          "cityId": {
+            "type": "string",
+            "example": "uuid-of-city",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "example": "Nigeria"
+          },
+          "postalCode": {
+            "type": "string",
+            "example": "101001",
+            "nullable": true
+          },
+          "isDefault": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "fullName",
+          "phone",
+          "addressLine1",
+          "city",
+          "state",
+          "country",
+          "isDefault"
+        ]
+      },
+      "CreateShippingAddressDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678"
+          },
+          "addressLine1": {
+            "type": "string",
+            "example": "12 Bode Thomas Street"
+          },
+          "addressLine2": {
+            "type": "string",
+            "example": "Surulere"
+          },
+          "state": {
+            "type": "string",
+            "example": "Lagos"
+          },
+          "city": {
+            "type": "string",
+            "example": "Lagos Island"
+          },
+          "cityId": {
+            "type": "string",
+            "example": "uuid-of-city",
+            "description": "City UUID for logistics lookup"
+          },
+          "country": {
+            "type": "string",
+            "example": "Nigeria"
+          },
+          "postalCode": {
+            "type": "string",
+            "example": "101001"
+          }
+        },
+        "required": [
+          "fullName",
+          "phone",
+          "addressLine1",
+          "state",
+          "city"
+        ]
+      },
+      "UpdateShippingAddressDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678"
+          },
+          "addressLine1": {
+            "type": "string",
+            "example": "12 Bode Thomas Street"
+          },
+          "addressLine2": {
+            "type": "string",
+            "example": "Surulere"
+          },
+          "state": {
+            "type": "string",
+            "example": "Lagos"
+          },
+          "city": {
+            "type": "string",
+            "example": "Lagos Island"
+          },
+          "cityId": {
+            "type": "string",
+            "example": "uuid-of-city"
+          },
+          "country": {
+            "type": "string",
+            "example": "Nigeria"
+          },
+          "postalCode": {
+            "type": "string",
+            "example": "101001"
+          }
+        }
+      },
+      "SeedUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "businessName": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "description": "Plain password that will be hashed before storing"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "SUPER_ADMIN",
+              "CUSTOMER",
+              "ADMIN",
+              "SUPPORT",
+              "LOGISTICS"
+            ],
+            "default": "CUSTOMER"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "isProfileComplete": {
+            "type": "boolean"
+          },
+          "isEmailVerified": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RunSeedDto": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "description": "Optional custom users to seed. When omitted, the default seed users are created.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeedUserDto"
+            }
+          }
+        }
+      },
+      "SeedShopifyCategoriesDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "SeedShopifyProductsDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateNewAdminProfileDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Jane"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "password": {
+            "type": "string",
+            "example": "P@ssword1!",
+            "description": "Min 8 chars, uppercase, lowercase, number, special char"
+          }
+        },
+        "required": [
+          "phone",
+          "password"
+        ]
+      },
+      "ChangeUserRole": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "SUPER_ADMIN",
+              "CUSTOMER",
+              "ADMIN",
+              "SUPPORT",
+              "LOGISTICS"
+            ],
+            "example": "SUPPORT"
+          }
+        },
+        "required": [
+          "userId",
+          "role"
+        ]
+      },
+      "AddAdminDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Jane"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "email": {
+            "type": "string",
+            "example": "admin@example.com"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "email"
+        ]
+      },
+      "UsersListResponseDto": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserDto"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginatedDataDto"
+          }
+        },
+        "required": [
+          "users",
+          "pagination"
+        ]
+      },
+      "UserStatsResponseDto": {
+        "type": "object",
+        "properties": {
+          "totalOrders": {
+            "type": "number",
+            "example": 12,
+            "description": "Total number of orders placed"
+          },
+          "totalSpent": {
+            "type": "number",
+            "example": 150000,
+            "description": "Cumulative amount spent in Naira"
+          },
+          "storeCreditBalance": {
+            "type": "number",
+            "example": 5000,
+            "description": "Current store credit balance in Naira"
+          },
+          "lastOrderAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2025-03-10T14:00:00.000Z",
+            "nullable": true,
+            "description": "Date of last order"
+          }
+        },
+        "required": [
+          "totalOrders",
+          "totalSpent",
+          "storeCreditBalance"
+        ]
+      },
+      "UserOrdersResponseDto": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Paginated list of orders"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginatedDataDto"
+          }
+        },
+        "required": [
+          "orders",
+          "pagination"
+        ]
+      },
+      "UserTransactionsResponseDto": {
+        "type": "object",
+        "properties": {
+          "transactions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Paginated list of store credit transactions"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginatedDataDto"
+          }
+        },
+        "required": [
+          "transactions",
+          "pagination"
+        ]
+      },
+      "SetupAccountDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "NewP@ssword1!",
+            "description": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character, and must be at least 8 characters long"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "example": "NewP@ssword1!"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Jane"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678"
+          },
+          "businessName": {
+            "type": "string",
+            "example": "Acme Ltd"
+          }
+        },
+        "required": [
+          "password",
+          "confirmPassword",
+          "phone"
+        ]
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "example": "OldP@ssword1!"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "NewP@ssword1!",
+            "description": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character, and must be at least 8 characters long"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "example": "NewP@ssword1!"
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword",
+          "confirmPassword"
+        ]
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Jane"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678"
+          },
+          "businessName": {
+            "type": "string",
+            "example": "Acme Ltd"
+          }
+        }
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Jane"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "email": {
+            "type": "string",
+            "example": "customer@example.com"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "SUPER_ADMIN",
+              "CUSTOMER",
+              "ADMIN",
+              "SUPPORT",
+              "LOGISTICS"
+            ],
+            "example": "CUSTOMER"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678"
+          },
+          "businessName": {
+            "type": "string",
+            "example": "Acme Ltd"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "email"
+        ]
+      },
+      "AwardStoreCreditDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "example": 500,
+            "description": "Amount in Naira to credit to the user"
+          },
+          "note": {
+            "type": "string",
+            "example": "Compensation for delayed order #ORD-001"
+          }
+        },
+        "required": [
+          "amount"
+        ]
+      },
+      "SendUserEmailDto": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "example": "Your order update"
+          },
+          "message": {
+            "type": "string",
+            "example": "Hello Jane, your order has been dispatched..."
+          }
+        },
+        "required": [
+          "subject",
+          "message"
+        ]
+      },
+      "LinkImageDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "example": "https://s3.us-east-1.amazonaws.com/my-bucket/images/abc.jpg",
+            "description": "Existing S3 object URL — must already exist in the configured bucket"
+          },
+          "altText": {
+            "type": "string",
+            "example": "Product front view"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "ResolveShippingDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "jane@example.com"
+          },
+          "addressId": {
+            "type": "string",
+            "example": "uuid-of-address"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "InlineAddressDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+2348012345678"
+          },
+          "addressLine1": {
+            "type": "string",
+            "example": "12 Bode Thomas Street"
+          },
+          "addressLine2": {
+            "type": "string",
+            "example": "Surulere"
+          },
+          "city": {
+            "type": "string",
+            "example": "Lagos Island"
+          },
+          "state": {
+            "type": "string",
+            "example": "Lagos"
+          },
+          "cityId": {
+            "type": "string",
+            "example": "uuid-of-city",
+            "description": "City UUID for logistics lookup"
+          },
+          "country": {
+            "type": "string",
+            "example": "Nigeria"
+          },
+          "postalCode": {
+            "type": "string",
+            "example": "101001"
+          }
+        },
+        "required": [
+          "fullName",
+          "phone",
+          "addressLine1",
+          "city",
+          "state"
+        ]
+      },
+      "OrderItemInputDto": {
+        "type": "object",
+        "properties": {
+          "variantId": {
+            "type": "string",
+            "example": "uuid-of-variant"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2,
+            "minimum": 1
+          }
+        },
+        "required": [
+          "variantId",
+          "quantity"
+        ]
+      },
+      "PlaceOrderDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "jane@example.com",
+            "description": "Customer email — account is auto-created if it does not exist"
+          },
+          "addressId": {
+            "type": "string",
+            "example": "uuid-of-address",
+            "description": "UUID of a saved address. Omit to use the inline address field."
+          },
+          "address": {
+            "description": "Required if addressId is not supplied",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InlineAddressDto"
+              }
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemInputDto"
+            }
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "PAYSTACK",
+              "BANK_TRANSFER",
+              "CASH_ON_DELIVERY"
+            ],
+            "example": "PAYSTACK"
+          },
+          "logisticsId": {
+            "type": "string",
+            "example": "uuid-of-logistics",
+            "description": "Required for delivery (PAYSTACK / BANK_TRANSFER). Omit for in-store pickup (CASH_ON_DELIVERY)."
+          },
+          "notes": {
+            "type": "string",
+            "example": "Leave at the gate"
+          }
+        },
+        "required": [
+          "email",
+          "items",
+          "paymentMethod"
+        ]
+      },
+      "UpdateOrderStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "CONFIRMED",
+              "PROCESSING",
+              "SHIPPED",
+              "DELIVERED",
+              "CANCELLED",
+              "PARTIALLY_FULFILLED",
+              "REFUNDED"
+            ]
+          },
+          "paymentStatus": {
+            "type": "string",
+            "enum": [
+              "UNPAID",
+              "PAID",
+              "PARTIAL",
+              "REFUNDED",
+              "CREDITED"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
