@@ -10,4 +10,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://dev.api.everythingflorences.com',
+        changeOrigin: true,
+        secure: false, // Ignore SSL certificate errors in dev
+      },
+    },
+  },
 })
