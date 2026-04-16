@@ -11,12 +11,14 @@ import Contact from "@/pages/contact/contact"
 import Login from "@/pages/auth/login"
 import ForgotPassword from "@/pages/auth/forgot-password"
 import AdminDashboard from "@/pages/admin/dashboard/admin-dashboard"
-import AdminProducts from "@/pages/admin/products/admin-products"
-import AdminOrders from "@/pages/admin/orders/admin-orders"
-import AdminUsers from "@/pages/admin/users/admin-users"
-import AdminCategories from "@/pages/admin/categories/admin-categories"
+import AdminProductsList from "@/pages/admin/products/admin-products-list"
+import AdminCategoriesList from "@/pages/admin/categories/admin-categories-list"
 import AdminCoupons from "@/pages/admin/coupons/admin-coupons"
 import AdminSettings from "@/pages/admin/settings/admin-settings"
+import AdminOrders from "@/pages/admin/orders/admin-orders"
+import AdminUsers from "@/pages/admin/users/admin-users"
+import AdminCustomers from "@/pages/admin/customers/admin-customers"
+import AdminOptions from "@/pages/admin/options/admin-options"
 import Account from "@/pages/account/account"
 import ProtectedRoute from "@/components/auth/protected-route"
 
@@ -37,17 +39,14 @@ export default function App() {
           </Route>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
-            <Route path="products" element={<AdminProducts />} />
-            <Route path="add-product" element={<AdminProducts />} />
-            <Route path="categories" element={<AdminCategories />} />
-            <Route path="add-category" element={<AdminCategories />} />
+            <Route path="products" element={<AdminProductsList />} />
+            <Route path="categories" element={<AdminCategoriesList />} />
             <Route path="orders" element={<AdminOrders />} />
-            <Route path="order-detail" element={<AdminOrders />} />
             <Route path="users" element={<AdminUsers />} />
-            <Route path="add-user" element={<AdminUsers />} />
+            <Route path="customers" element={<AdminCustomers />} />
             <Route path="coupons" element={<AdminCoupons />} />
-            <Route path="create-coupon" element={<AdminCoupons />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="options" element={<AdminOptions />} />
             <Route path="reports" element={<AdminDashboard />} />
           </Route>
         </Routes>

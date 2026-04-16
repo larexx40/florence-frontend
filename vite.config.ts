@@ -15,7 +15,8 @@ export default defineConfig({
       '/api': {
         target: 'https://dev.api.everythingflorences.com',
         changeOrigin: true,
-        secure: false, // Ignore SSL certificate errors in dev
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

@@ -79,23 +79,35 @@ export const productApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, slug) => [{ type: "Product", id: slug }],
     }),
 
-    // POST /products - Create product (admin only)
-    createProduct: builder.mutation<ApiResponse<ProductDto>, CreateProductDto>({
-      query: (body) => ({
-        url: "/products",
-        method: "POST",
-        body,
-      }),
+    // POST /products - Create product (supports both JSON and FormData)
+    createProduct: builder.mutation<ApiResponse<ProductDto>, CreateProductDto | FormData>({
+      query: (body) => {
+        const isFormData = body instanceof FormData
+        return {
+          url: "/products",
+          method: "POST",
+          body,
+          headers: isFormData
+            ? {} // Let browser set Content-Type for FormData
+            : { "Content-Type": "application/json" },
+        }
+      },
       invalidatesTags: ["Products"],
     }),
 
-    // PATCH /products/{id} - Update product (admin only)
-    updateProduct: builder.mutation<ApiResponse<ProductDto>, { id: string; body: UpdateProductDto }>({
-      query: ({ id, body }) => ({
-        url: `/products/${id}`,
-        method: "PATCH",
-        body,
-      }),
+    // PATCH /products/{id} - Update product (supports both JSON and FormData)
+    updateProduct: builder.mutation<ApiResponse<ProductDto>, { id: string; body: UpdateProductDto | FormData }>({
+      query: ({ id, body }) => {
+        const isFormData = body instanceof FormData
+        return {
+          url: `/products/${id}`,
+          method: "PATCH",
+          body,
+          headers: isFormData
+            ? {} // Let browser set Content-Type for FormData
+            : { "Content-Type": "application/json" },
+        }
+      },
       invalidatesTags: (result, error, { id }) => [{ type: "Product", id }, "Products"],
     }),
 
@@ -108,13 +120,30 @@ export const productApi = baseApi.injectEndpoints({
       invalidatesTags: ["Products"],
     }),
 
-    // POST /products/{id}/images - Attach image to product
+    // POST /products/{id}/images - Attach image via URL (JSON)
     attachImage: builder.mutation<ApiResponse<ProductDto>, { id: string; body: AttachImageDto }>({
       query: ({ id, body }) => ({
         url: `/products/${id}/images`,
         method: "POST",
         body,
+        headers: { "Content-Type": "application/json" },
       }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Product", id }],
+    }),
+
+    // POST /products/{id}/images/upload - Upload image file (FormData)
+    uploadProductImage: builder.mutation<ApiResponse<ProductDto>, { id: string; file: File; altText?: string }>({
+      query: ({ id, file, altText }) => {
+        const formData = new FormData()
+        formData.append("image", file)
+        if (altText) formData.append("altText", altText)
+        return {
+          url: `/products/${id}/images/upload`,
+          method: "POST",
+          body: formData,
+          // Let browser set Content-Type for FormData
+        }
+      },
       invalidatesTags: (result, error, { id }) => [{ type: "Product", id }],
     }),
 
@@ -136,5 +165,6 @@ export const {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useAttachImageMutation,
+  useUploadProductImageMutation,
   useDetachImageMutation,
 } = productApi

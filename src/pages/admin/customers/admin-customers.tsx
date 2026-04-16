@@ -1,21 +1,16 @@
 import { useState } from "react"
 import { useGetUsersQuery, useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation, useToggleUserActiveMutation } from "@/api/user.api"
-import { useAddAdminMutation, useChangeUserRoleMutation } from "@/api/admin.api"
+import { Pencil, Trash2, X } from "lucide-react"
 import StatusBadge from "@/ui/badge/status-badge"
 import Button from "@/ui/button/button"
-import { Pencil, Trash2, X } from "lucide-react"
 import { showSuccessToast, showErrorToast, showConfirmModal, showErrorModal } from "@/utils/swal"
 import type { UserDto, CreateUserDto, UpdateUserDto } from "@/@types/user.type"
-import type { UserRole } from "@/@types/auth.type"
 
-const adminRoles: UserRole[] = ["ADMIN", "SUPPORT", "LOGISTICS", "SUPER_ADMIN"]
-const adminRoleOptions: UserRole[] = ["ADMIN", "SUPPORT", "LOGISTICS", "SUPER_ADMIN"]
-
-export default function AdminUsers() {
+export default function AdminCustomers() {
   const [page, setPage] = useState(1)
   const [limit] = useState(10)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isEditModalOpen, setIsIsEditModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<UserDto | null>(null)
   
   // Form states
@@ -34,12 +29,10 @@ export default function AdminUsers() {
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation()
   const [toggleActive, { isLoading: isToggling }] = useToggleUserActiveMutation()
-  const [changeRole, { isLoading: isChangingRole }] = useChangeUserRoleMutation()
-  const [addAdmin, { isLoading: isAddingAdmin }] = useAddAdminMutation()
 
-  // Filter only admin users
+  // Filter only customer users
   const allUsers = usersData?.data?.users || []
-  const users = allUsers.filter((user) => adminRoles.includes(user.role))
+  const users = allUsers.filter((user) => user.role === "CUSTOMER")
   const pagination = usersData?.data?.pagination
 
   const handleAddUser = async (e: React.FormEvent) => {
@@ -47,15 +40,15 @@ export default function AdminUsers() {
     try {
       const response = await createUser(formData).unwrap()
       if (response.status) {
-        showSuccessToast("User created successfully!")
+        showSuccessToast("Customer created successfully!")
         setIsAddModalOpen(false)
         setFormData({ firstName: "", lastName: "", email: "", role: "CUSTOMER", phone: "", businessName: "" })
         refetch()
       } else {
-        showErrorModal("Error", response.message || "Failed to create user")
+        showErrorModal("Error", response.message || "Failed to create customer")
       }
     } catch (error: any) {
-      showErrorModal("Error", error.data?.message || "Failed to create user")
+      showErrorModal("Error", error.data?.message || "Failed to create customer")
     }
   }
 
@@ -72,21 +65,21 @@ export default function AdminUsers() {
       }
       const response = await updateUser({ id: selectedUser.id, body: updateData }).unwrap()
       if (response.status) {
-        showSuccessToast("User updated successfully!")
-        setIsEditModalOpen(false)
+        showSuccessToast("Customer updated successfully!")
+        setIsIsEditModalOpen(false)
         setSelectedUser(null)
         refetch()
       } else {
-        showErrorModal("Error", response.message || "Failed to update user")
+        showErrorModal("Error", response.message || "Failed to update customer")
       }
     } catch (error: any) {
-      showErrorModal("Error", error.data?.message || "Failed to update user")
+      showErrorModal("Error", error.data?.message || "Failed to update customer")
     }
   }
 
   const handleDeleteUser = async (user: UserDto) => {
     const result = await showConfirmModal(
-      "Delete User",
+      "Delete Customer",
       `Are you sure you want to delete ${user.firstName} ${user.lastName}? This action cannot be undone.`,
       "Delete",
       "Cancel"
@@ -96,13 +89,13 @@ export default function AdminUsers() {
       try {
         const response = await deleteUser(user.id).unwrap()
         if (response.status) {
-          showSuccessToast("User deleted successfully!")
+          showSuccessToast("Customer deleted successfully!")
           refetch()
         } else {
-          showErrorToast(response.message || "Failed to delete user")
+          showErrorToast(response.message || "Failed to delete customer")
         }
       } catch (error: any) {
-        showErrorToast(error.data?.message || "Failed to delete user")
+        showErrorToast(error.data?.message || "Failed to delete customer")
       }
     }
   }
@@ -111,27 +104,13 @@ export default function AdminUsers() {
     try {
       const response = await toggleActive(user.id).unwrap()
       if (response.status) {
-        showSuccessToast(`User ${response.data?.isActive ? "activated" : "deactivated"} successfully!`)
+        showSuccessToast(`Customer ${response.data?.isActive ? "activated" : "deactivated"} successfully!`)
         refetch()
       } else {
-        showErrorToast(response.message || "Failed to toggle user status")
+        showErrorToast(response.message || "Failed to toggle customer status")
       }
     } catch (error: any) {
-      showErrorToast(error.data?.message || "Failed to toggle user status")
-    }
-  }
-
-  const handleChangeRole = async (user: UserDto, newRole: UserRole) => {
-    try {
-      const response = await changeRole({ userId: user.id, role: newRole }).unwrap()
-      if (response.status) {
-        showSuccessToast(`Role changed to ${newRole} successfully!`)
-        refetch()
-      } else {
-        showErrorToast(response.message || "Failed to change role")
-      }
-    } catch (error: any) {
-      showErrorToast(error.data?.message || "Failed to change role")
+      showErrorToast(error.data?.message || "Failed to toggle customer status")
     }
   }
 
@@ -145,7 +124,7 @@ export default function AdminUsers() {
       phone: user.phone || "",
       businessName: user.businessName || "",
     })
-    setIsEditModalOpen(true)
+    setIsIsEditModalOpen(true)
   }
 
   if (isLoading) {
@@ -164,41 +143,31 @@ export default function AdminUsers() {
       <div className="bg-white rounded-xl p-6 shadow-sm border border-cdark-100">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h4 className="text-xl font-semibold">Admin Users</h4>
+            <h4 className="text-xl font-semibold">Customers</h4>
             <p className="text-sm text-cdark-500 mt-1">
-              {users.length} admin users
+              {users.length} customers
             </p>
           </div>
           <Button variant="primary" onClick={() => setIsAddModalOpen(true)}>
-            Add User
+            Add Customer
           </Button>
         </div>
 
-        {/* Users Table */}
+        {/* Customers Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-cdark-200">
-                <th className="text-left py-3 px-2 font-medium text-cdark-500">User</th>
+                <th className="text-left py-3 px-2 font-medium text-cdark-500">Customer</th>
                 <th className="text-left py-3 px-2 font-medium text-cdark-500">Email</th>
-                <th className="text-left py-3 px-2 font-medium text-cdark-500">Role</th>
+                <th className="text-left py-3 px-2 font-medium text-cdark-500">Phone</th>
                 <th className="text-left py-3 px-2 font-medium text-cdark-500">Status</th>
                 <th className="text-left py-3 px-2 font-medium text-cdark-500">Join Date</th>
                 <th className="text-left py-3 px-2 font-medium text-cdark-500">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {users.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-8">
-                    <EmptyState
-                      title="No users found"
-                      description="Users will appear here when they register"
-                    />
-                  </td>
-                </tr>
-              ) : (
-                users.map((user) => (
+              {users.map((user) => (
                 <tr key={user.id} className="border-b border-cdark-50 hover:bg-cgrey-50 transition-colors">
                   <td className="py-3 px-2">
                     <div className="flex items-center gap-3">
@@ -209,18 +178,7 @@ export default function AdminUsers() {
                     </div>
                   </td>
                   <td className="py-3 px-2 text-cdark-600">{user.email}</td>
-                  <td className="py-3 px-2">
-                    <select
-                      value={user.role}
-                      onChange={(e) => handleChangeRole(user, e.target.value as UserRole)}
-                      disabled={isChangingRole}
-                      className="px-2 py-1 bg-cblue-50 text-cblue-700 rounded text-xs font-medium border-0 cursor-pointer hover:bg-cblue-100 transition-colors"
-                    >
-                      {adminRoleOptions.map((role) => (
-                        <option key={role} value={role}>{role}</option>
-                      ))}
-                    </select>
-                  </td>
+                  <td className="py-3 px-2 text-cdark-600">{user.phone || "—"}</td>
                   <td className="py-3 px-2">
                     <button
                       onClick={() => handleToggleActive(user)}
@@ -257,7 +215,7 @@ export default function AdminUsers() {
                     </div>
                   </td>
                 </tr>
-              )))}
+              ))}
             </tbody>
           </table>
         </div>
@@ -291,13 +249,13 @@ export default function AdminUsers() {
         )}
       </div>
 
-      {/* Add User Modal */}
+      {/* Add Customer Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold">Add New User</h3>
+                <h3 className="text-xl font-semibold">Add New Customer</h3>
                 <button
                   onClick={() => setIsAddModalOpen(false)}
                   className="text-cdark-500 hover:text-cdark-700"
@@ -339,18 +297,6 @@ export default function AdminUsers() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Role</label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
-                    className="w-full px-4 py-2 rounded-lg border border-cdark-200 focus:outline-none focus:border-cblue-500"
-                  >
-                    {adminRoleOptions.map((role) => (
-                      <option key={role} value={role}>{role}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
                   <label className="block text-sm font-medium mb-1">Phone (Optional)</label>
                   <input
                     type="tel"
@@ -373,7 +319,7 @@ export default function AdminUsers() {
                     Cancel
                   </Button>
                   <Button variant="primary" type="submit" disabled={isCreating}>
-                    {isCreating ? "Creating..." : "Create User"}
+                    {isCreating ? "Creating..." : "Create Customer"}
                   </Button>
                 </div>
               </form>
@@ -382,15 +328,15 @@ export default function AdminUsers() {
         </div>
       )}
 
-      {/* Edit User Modal */}
+      {/* Edit Customer Modal */}
       {isEditModalOpen && selectedUser && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold">Edit User</h3>
+                <h3 className="text-xl font-semibold">Edit Customer</h3>
                 <button
-                  onClick={() => setIsEditModalOpen(false)}
+                  onClick={() => setIsIsEditModalOpen(false)}
                   className="text-cdark-500 hover:text-cdark-700"
                 >
                   <X size={20} />
@@ -438,7 +384,7 @@ export default function AdminUsers() {
                   />
                 </div>
                 <div className="flex items-center justify-end gap-3 pt-4">
-                  <Button variant="secondary" onClick={() => setIsEditModalOpen(false)}>
+                  <Button variant="secondary" onClick={() => setIsIsEditModalOpen(false)}>
                     Cancel
                   </Button>
                   <Button variant="primary" type="submit" disabled={isUpdating}>

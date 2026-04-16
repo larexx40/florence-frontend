@@ -43,10 +43,7 @@ export const userApi = baseApi.injectEndpoints({
 
     // GET /users - List all users (admin only)
     getUsers: builder.query<ApiResponse<UsersListResponseDto>, { page?: number; limit?: number }>({
-      query: (params) => ({
-        url: "/users",
-        params,
-      }),
+      query: () => "/users",
       providesTags: ["User"],
     }),
 

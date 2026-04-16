@@ -5,62 +5,25 @@ import Icon, { HEROICONS } from "@/ui/icons/icon"
 
 const sidebarItems = [
   { label: "Dashboard", href: "/admin", icon: "ri-home-line" },
-  {
-    label: "Products",
-    children: [
-      { label: "Products", href: "/admin/products" },
-      { label: "Add New Product", href: "/admin/add-product" },
-    ],
-    icon: "ri-store-3-line",
-  },
-  {
-    label: "Category",
-    children: [
-      { label: "Category List", href: "/admin/categories" },
-      { label: "Add Category", href: "/admin/add-category" },
-    ],
-    icon: "ri-list-check-2",
-  },
-  {
-    label: "Orders",
-    children: [
-      { label: "Order List", href: "/admin/orders" },
-      { label: "Order Detail", href: "/admin/order-detail" },
-    ],
-    icon: "ri-archive-line",
-  },
-  {
-    label: "Users",
-    children: [
-      { label: "All Users", href: "/admin/users" },
-      { label: "Add User", href: "/admin/add-user" },
-    ],
-    icon: "ri-user-3-line",
-  },
-  {
-    label: "Coupons",
-    children: [
-      { label: "Coupon List", href: "/admin/coupons" },
-      { label: "Create Coupon", href: "/admin/create-coupon" },
-    ],
-    icon: "ri-price-tag-3-line",
-  },
+  { label: "Products", href: "/admin/products", icon: "ri-store-3-line" },
+  { label: "Categories", href: "/admin/categories", icon: "ri-list-check-2" },
+  { label: "Orders", href: "/admin/orders", icon: "ri-archive-line" },
+  { label: "Customers", href: "/admin/customers", icon: "ri-user-3-line" },
+  { label: "Users", href: "/admin/users", icon: "ri-user-settings-line" },
+  { label: "Coupons", href: "/admin/coupons", icon: "ri-price-tag-3-line" },
+  { label: "Options", href: "/admin/options", icon: "ri-list-settings-line" },
   { label: "Reports", href: "/admin/reports", icon: "ri-file-chart-line" },
   { label: "Settings", href: "/admin/settings", icon: "ri-settings-line" },
 ]
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(["Products", "Orders"])
   const location = useLocation()
 
-  const toggleMenu = (label: string) => {
-    setExpandedMenus((prev) =>
-      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
-    )
+  const isActive = (href: string) => {
+    if (href === "/admin") return location.pathname === "/admin"
+    return location.pathname.startsWith(href)
   }
-
-  const isActive = (href: string) => location.pathname === href
 
   return (
     <div className="min-h-screen bg-cgrey-50 flex">
@@ -90,62 +53,19 @@ export default function AdminLayout() {
         {/* Nav */}
         <nav className="flex-1 py-4 overflow-y-auto">
           {sidebarItems.map((item) => (
-            <div key={item.label}>
-              {"children" in item && item.children ? (
-                <>
-                  <button
-                    onClick={() => toggleMenu(item.label)}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-cdark-300 hover:text-white hover:bg-cdark-800 transition-colors"
-                  >
-                    <i className={cn(item.icon, "text-lg")} />
-                    {sidebarOpen && (
-                      <>
-                        <span className="flex-1 text-left">{item.label}</span>
-                        <Icon
-                          icon={HEROICONS.CHEVRON_DOWN}
-                          size={14}
-                          className={cn(
-                            "transition-transform",
-                            expandedMenus.includes(item.label) && "rotate-180"
-                          )}
-                        />
-                      </>
-                    )}
-                  </button>
-                  {sidebarOpen && expandedMenus.includes(item.label) && (
-                    <div className="ml-7 border-l border-cdark-700">
-                      {item.children.map((child) => (
-                        <Link
-                          key={child.href}
-                          to={child.href}
-                          className={cn(
-                            "block px-4 py-2 text-sm transition-colors",
-                            isActive(child.href)
-                              ? "text-cblue-400 bg-cdark-800"
-                              : "text-cdark-400 hover:text-white"
-                          )}
-                        >
-                          {child.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <Link
-                  to={item.href!}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-2.5 text-sm transition-colors",
-                    isActive(item.href!)
-                      ? "text-white bg-cdark-800"
-                      : "text-cdark-300 hover:text-white hover:bg-cdark-800"
-                  )}
-                >
-                  <i className={cn(item.icon, "text-lg")} />
-                  {sidebarOpen && <span>{item.label}</span>}
-                </Link>
+            <Link
+              key={item.label}
+              to={item.href}
+              className={cn(
+                "flex items-center gap-3 px-4 py-2.5 text-sm transition-colors",
+                isActive(item.href)
+                  ? "text-white bg-cdark-800"
+                  : "text-cdark-300 hover:text-white hover:bg-cdark-800"
               )}
-            </div>
+            >
+              <i className={cn(item.icon, "text-lg")} />
+              {sidebarOpen && <span>{item.label}</span>}
+            </Link>
           ))}
         </nav>
       </aside>

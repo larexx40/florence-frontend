@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { mockOrders } from "@/mockdata/order/orders"
+import EmptyState from "@/ui/empty-state/empty-state"
 import StatusBadge from "@/ui/badge/status-badge"
 
 export default function AdminOrders() {
@@ -34,28 +35,38 @@ export default function AdminOrders() {
             </tr>
           </thead>
           <tbody>
-            {mockOrders.map((order) => (
-              <tr key={order.id} className="border-b border-cdark-50 hover:bg-cgrey-50 transition-colors">
-                <td className="py-3 px-2 font-medium text-cdark-900">{order.orderNumber}</td>
-                <td className="py-3 px-2">
-                  <div>
-                    <p className="font-medium text-cdark-900">{order.customer}</p>
-                    <p className="text-xs text-cdark-400">{order.email}</p>
-                  </div>
-                </td>
-                <td className="py-3 px-2 text-cdark-600">{order.date}</td>
-                <td className="py-3 px-2 text-cdark-600">{order.items}</td>
-                <td className="py-3 px-2 font-medium text-cdark-900">${order.total.toFixed(2)}</td>
-                <td className="py-3 px-2 text-cdark-600">{order.paymentMethod}</td>
-                <td className="py-3 px-2"><StatusBadge status={order.status} /></td>
-                <td className="py-3 px-2">
-                  <Link to="/admin/order-detail" className="p-1.5 hover:bg-cdark-100 rounded-lg text-cdark-500 hover:text-cblue-600" title="View">
-                    <i className="ri-eye-line" />
-                  </Link>
+            {mockOrders.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="py-8">
+                  <EmptyState
+                    title="No orders found"
+                    description="Orders will appear here when customers make purchases"
+                  />
                 </td>
               </tr>
-            ))}
-          </tbody>
+            ) : (
+              mockOrders.map((order) => (
+                <tr key={order.id} className="border-b border-cdark-50 hover:bg-cgrey-50 transition-colors">
+                  <td className="py-3 px-2 font-medium text-cdark-900">{order.orderNumber}</td>
+                  <td className="py-3 px-2">
+                    <div>
+                      <p className="font-medium text-cdark-900">{order.customer}</p>
+                      <p className="text-xs text-cdark-400">{order.email}</p>
+                    </div>
+                  </td>
+                  <td className="py-3 px-2 text-cdark-600">{order.date}</td>
+                  <td className="py-3 px-2 text-cdark-600">{order.items}</td>
+                  <td className="py-3 px-2 font-medium text-cdark-900">${order.total.toFixed(2)}</td>
+                  <td className="py-3 px-2 text-cdark-600">{order.paymentMethod}</td>
+                  <td className="py-3 px-2"><StatusBadge status={order.status} /></td>
+                  <td className="py-3 px-2">
+                    <Link to="/admin/order-detail" className="p-1.5 hover:bg-cdark-100 rounded-lg text-cdark-500 hover:text-cblue-600" title="View">
+                      <i className="ri-eye-line" />
+                    </Link>
+                  </td>
+                </tr>
+              )))}
+            </tbody>
         </table>
       </div>
     </div>

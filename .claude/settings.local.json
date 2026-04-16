@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const d = require\\('./docs-json.json'\\); console.log\\(Object.keys\\(d.paths\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const d = require\\('./docs-json.json'\\); const paths = Object.keys\\(d.paths\\).filter\\(p => p.includes\\('option'\\)\\); paths.forEach\\(p => { console.log\\('\\\\n' + p + ':'\\); console.log\\('  Methods:', Object.keys\\(d.paths[p]\\).join\\(', '\\)\\); Object.keys\\(d.paths[p]\\).forEach\\(m => { const op = d.paths[p][m]; console.log\\('  ' + m.toUpperCase\\(\\) + ':', op.summary || op.operationId || ''\\); }\\); }\\)\")"
+    ]
+  }
+}

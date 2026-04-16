@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import Cookies from "js-cookie"
 import { Eye, EyeOff } from "lucide-react"
+import { showErrorModal, showSuccessToast } from "@/utils/swal"
 import { login } from "@/store/slices/auth.slice"
 import { useLoginMutation } from "@/api/auth.api"
 
@@ -11,7 +12,6 @@ export default function Login() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
-  const [errorMsg, setErrorMsg] = useState("")
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const location = useLocation()
@@ -21,13 +21,12 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setErrorMsg("")
     
     try {
       const response = await loginMutation({ email, password }).unwrap()
       
       if (!response.status) {
-        setErrorMsg(response.message || "Login failed")
+        showErrorModal('Login Failed', response.message || "Login failed")
         return
       }
       
@@ -44,6 +43,9 @@ export default function Login() {
         role: user.role,
       }))
       
+      // Show success toast
+      showSuccessToast(`Welcome back, ${user.firstName}!`)
+      
       const isAdmin = ["SUPER_ADMIN", "ADMIN", "SUPPORT", "LOGISTICS"].includes(user.role)
       if (isAdmin) {
         navigate("/admin")
@@ -51,7 +53,10 @@ export default function Login() {
         navigate(from, { replace: true })
       }
     } catch (error: any) {
-      setErrorMsg(error.data?.message || error.message || "Invalid credentials. Please try again.")
+      showErrorModal(
+        'Login Failed',
+        error.data?.message || error.message || "Invalid credentials. Please try again."
+      )
     }
   }
 
@@ -71,12 +76,6 @@ export default function Login() {
             <p className="text-[#6B6560] text-sm">Sign in to your account to continue</p>
           </div>
           
-          {/* Error Message */}
-          {errorMsg && (
-            <div className="mb-6 p-4 bg-[#DC2626]/10 border border-[#DC2626]/20 text-[#DC2626] rounded-xl text-sm">
-              {errorMsg}
-            </div>
-          )}
           
           {/* Form */}
           <form onSubmit={handleLogin} className="space-y-5">
