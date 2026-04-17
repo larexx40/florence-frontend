@@ -1,30 +1,39 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Link } from "react-router-dom"
-import { useGetProductsQuery, useDeleteProductMutation, useUpdateProductMutation, useCreateProductMutation } from "@/api/product.api"
+import { useGetProductsQuery, useDeleteProductMutation, useUpdateProductMutation, useCreateProductMutation, useAttachImageMutation } from "@/api/product.api"
 import { useGetCategoriesQuery } from "@/api/category.api"
-import { Pencil, Trash2, Eye, Plus, X } from "lucide-react"
+import { useGetCategoryOptionsQuery, useAddProductOptionMutation, useAddProductOptionValueMutation } from "@/api/option.api"
+import { Pencil, Trash2, Eye, Plus, X, ChevronDown, ChevronUp } from "lucide-react"
 import Button from "@/ui/button/button"
 import EmptyState from "@/ui/empty-state/empty-state"
 import ImageUpload from "@/ui/image-upload/image-upload"
 import { showConfirmModal, showSuccessToast, showErrorModal } from "@/utils/swal"
-import type { ProductDto, CreateProductDto } from "@/@types/product-api.type"
+import type { ProductDto } from "@/api/product.api"
+import type { CreateProductDto } from "@/@types/product-api.type"
+import type { CategoryOptionDto } from "@/@types/option.type"
+
+// Product option with values for form state
+interface ProductOptionConfig {
+  categoryOptionId: string
+  name: string
+  values: string[]
+  isExpanded: boolean
+}
 
 const initialFormData: CreateProductDto = {
   name: "",
   description: "",
-  price: 0,
-  compareAtPrice: null,
+  basePrice: 0,
+  compareAtPrice: undefined,
   categoryId: "",
   sku: "",
-  barcode: null,
-  inventoryQuantity: 0,
+  barcode: undefined,
+  trackInventory: true,
+  stockQuantity: 0,
+  lowStockThreshold: 5,
   isActive: true,
-  isFeatured: false,
-  images: [],
-  weight: null,
-  dimensions: null,
-  metaTitle: null,
-  metaDescription: null,
+  metaTitle: undefined,
+  metaDescription: undefined,
 }
 
 export default function AdminProductsList() {
@@ -33,6 +42,7 @@ export default function AdminProductsList() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [formData, setFormData] = useState<CreateProductDto>({ ...initialFormData })
   const [productImages, setProductImages] = useState<Array<File | string>>([])
+  const [productOptions, setProductOptions] = useState<ProductOptionConfig[]>([])
 
   // API hooks
   const { data: productsData, isLoading: isLoadingProducts, refetch } = useGetProductsQuery({
@@ -40,12 +50,34 @@ export default function AdminProductsList() {
     categoryId: selectedCategory || undefined,
   })
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery()
+  const { data: categoryOptionsData, isLoading: isLoadingCategoryOptions } = useGetCategoryOptionsQuery(
+    formData.categoryId || "",
+    { skip: !formData.categoryId || !isCreateModalOpen }
+  )
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation()
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation()
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation()
+  const [attachImage] = useAttachImageMutation()
+  const [addProductOption] = useAddProductOptionMutation()
+  const [addProductOptionValue] = useAddProductOptionValueMutation()
 
   const products = productsData?.data?.products || []
   const categories = categoriesData?.data?.categories || []
+  const categoryOptions = categoryOptionsData?.data || []
+
+  // Initialize product options when category options are loaded
+  useMemo(() => {
+    if (categoryOptions.length > 0 && productOptions.length === 0) {
+      setProductOptions(
+        categoryOptions.map((opt: CategoryOptionDto) => ({
+          categoryOptionId: opt.id,
+          name: opt.name,
+          values: [],
+          isExpanded: false,
+        }))
+      )
+    }
+  }, [categoryOptions, productOptions.length])
 
   const getCategoryName = (categoryId: string) => {
     const category = categories.find((c) => c.id === categoryId)
@@ -92,49 +124,151 @@ export default function AdminProductsList() {
     }
   }
 
-  const buildProductFormData = (): FormData => {
-    const formDataToSend = new FormData()
-    formDataToSend.append("name", formData.name)
-    if (formData.description) formDataToSend.append("description", formData.description)
-    formDataToSend.append("price", String(formData.price))
-    if (formData.compareAtPrice) formDataToSend.append("compareAtPrice", String(formData.compareAtPrice))
-    formDataToSend.append("categoryId", formData.categoryId)
-    formDataToSend.append("sku", formData.sku)
-    if (formData.barcode) formDataToSend.append("barcode", formData.barcode)
-    formDataToSend.append("inventoryQuantity", String(formData.inventoryQuantity))
-    formDataToSend.append("isActive", String(formData.isActive))
-    formDataToSend.append("isFeatured", String(formData.isFeatured))
-    if (formData.weight) formDataToSend.append("weight", String(formData.weight))
-    if (formData.metaTitle) formDataToSend.append("metaTitle", formData.metaTitle)
-    if (formData.metaDescription) formDataToSend.append("metaDescription", formData.metaDescription)
+  // Build minimal create payload - backend only accepts these fields on create
+  // Note: SKU is auto-generated by the backend
+  const buildCreatePayload = () => {
+    return {
+      name: formData.name,
+      description: formData.description,
+      categoryId: formData.categoryId,
+    }
+  }
 
-    productImages.forEach((img, index) => {
-      if (img instanceof File) {
-        formDataToSend.append(`imageFiles[${index}]`, img)
-      } else if (typeof img === "string") {
-        formDataToSend.append(`imageUrls[${index}]`, img)
+  // Build update payload - only send fields allowed by backend
+  const buildUpdatePayload = () => {
+    return {
+      name: formData.name,
+      description: formData.description,
+      compareAtPrice: formData.compareAtPrice,
+      categoryId: formData.categoryId,
+      barcode: formData.barcode,
+      isActive: formData.isActive,
+      metaTitle: formData.metaTitle,
+      metaDescription: formData.metaDescription,
+    }
+  }
+
+  // Handle category change - reset options when category changes
+  const handleCategoryChange = (categoryId: string) => {
+    setFormData({ ...formData, categoryId })
+    setProductOptions([])
+  }
+
+  // Toggle option expansion
+  const toggleOptionExpand = (optionId: string) => {
+    setProductOptions(prev =>
+      prev.map(opt =>
+        opt.categoryOptionId === optionId
+          ? { ...opt, isExpanded: !opt.isExpanded }
+          : opt
+      )
+    )
+  }
+
+  // Add value to option
+  const addOptionValue = (optionId: string, value: string) => {
+    if (!value.trim()) return
+    setProductOptions(prev =>
+      prev.map(opt =>
+        opt.categoryOptionId === optionId
+          ? { ...opt, values: [...opt.values, value.trim()] }
+          : opt
+      )
+    )
+  }
+
+  // Remove value from option
+  const removeOptionValue = (optionId: string, valueIndex: number) => {
+    setProductOptions(prev =>
+      prev.map(opt =>
+        opt.categoryOptionId === optionId
+          ? { ...opt, values: opt.values.filter((_, i) => i !== valueIndex) }
+          : opt
+      )
+    )
+  }
+
+  // Attach options and values to product after creation
+  const attachOptionsToProduct = async (productId: string) => {
+    const optionsWithValues = productOptions.filter(opt => opt.values.length > 0)
+
+    for (const option of optionsWithValues) {
+      try {
+        const optionResponse = await addProductOption({
+          productId,
+          body: { categoryOptionId: option.categoryOptionId }
+        }).unwrap()
+
+        if (optionResponse.status && optionResponse.data) {
+          const productOptionId = optionResponse.data.id
+          for (const value of option.values) {
+            await addProductOptionValue({
+              productId,
+              optionId: productOptionId,
+              body: { value }
+            }).unwrap()
+          }
+        }
+      } catch (error) {
+        console.error("Failed to attach option:", option.name, error)
       }
-    })
+    }
+  }
 
-    return formDataToSend
+  // Attach images after product creation (URL only - upload endpoint doesn't exist)
+  const attachProductImages = async (productId: string) => {
+    for (let index = 0; index < productImages.length; index++) {
+      const img = productImages[index]
+      try {
+        if (typeof img === "string" && img.trim()) {
+          // Attach image via URL (JSON)
+          await attachImage({
+            id: productId,
+            body: {
+              imageId: img,
+              position: index,
+              altText: `${formData.name} - Image ${index + 1}`
+            }
+          }).unwrap()
+        }
+      } catch (error) {
+        console.error("Failed to attach image:", img, error)
+      }
+    }
   }
 
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const hasImages = productImages.length > 0
-      const body = hasImages ? buildProductFormData() : formData
-      const response = await createProduct(body as CreateProductDto).unwrap()
-      if (response.status) {
+      // Step 1: Create product with minimal fields
+      const createBody = buildCreatePayload()
+      const createResponse = await createProduct(createBody).unwrap()
+      
+      if (createResponse.status && createResponse.data) {
+        const productId = createResponse.data.id
+        
+        // Step 2: Update product with all other fields
+        const updateBody = buildUpdatePayload()
+        await updateProduct({ id: productId, body: updateBody }).unwrap()
+        
+        // Step 3: Attach images if any (URL only)
+        if (productImages.length > 0) {
+          await attachProductImages(productId)
+        }
+        
+        // Step 4: Attach options to the created product
+        await attachOptionsToProduct(productId)
         showSuccessToast("Product created successfully!")
         setIsCreateModalOpen(false)
         setFormData({ ...initialFormData })
         setProductImages([])
+        setProductOptions([])
         refetch()
       } else {
-        showErrorModal("Error", response.message || "Failed to create product")
+        showErrorModal("Error", createResponse.message || "Failed to create product")
       }
     } catch (error: any) {
+      console.error("Create product error:", error)
       showErrorModal("Error", error.data?.message || "Failed to create product")
     }
   }
@@ -219,8 +353,8 @@ export default function AdminProductsList() {
                 products.map((product) => (
                   <tr key={product.id} className="border-b border-cdark-50 hover:bg-cgrey-50 transition-colors">
                     <td className="py-3 px-2">
-                      {product.images?.[0] ? (
-                        <img src={product.images[0]} alt={product.name} className="w-12 h-14 rounded-lg object-cover" />
+                      {product.images?.[0]?.url ? (
+                        <img src={product.images[0].url} alt={product.name} className="w-12 h-14 rounded-lg object-cover" />
                       ) : (
                         <div className="w-12 h-14 rounded-lg bg-cgrey-200 flex items-center justify-center text-cdark-400">
                           <i className="ri-image-line" />
@@ -229,8 +363,8 @@ export default function AdminProductsList() {
                     </td>
                     <td className="py-3 px-2 font-medium text-cdark-900">{product.name}</td>
                     <td className="py-3 px-2 text-cdark-600">{getCategoryName(product.categoryId || "")}</td>
-                    <td className="py-3 px-2 text-cdark-900 font-medium">${product.price.toFixed(2)}</td>
-                    <td className="py-3 px-2 text-cdark-600">{product.inventoryQuantity}</td>
+                    <td className="py-3 px-2 text-cdark-900 font-medium">${(product.basePrice ?? 0).toFixed(2)}</td>
+                    <td className="py-3 px-2 text-cdark-600">{product.stockQuantity ?? 0}</td>
                     <td className="py-3 px-2">
                       <button
                         onClick={() => handleToggleStatus(product)}
@@ -319,7 +453,7 @@ export default function AdminProductsList() {
                   <label className="block text-sm font-medium mb-1">Category *</label>
                   <select
                     value={formData.categoryId}
-                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
                     className="w-full px-4 py-2 rounded-lg border border-cdark-200 focus:outline-none focus:border-cblue-500"
                     required
                   >
@@ -332,13 +466,110 @@ export default function AdminProductsList() {
                   </select>
                 </div>
 
+                {/* Product Options Section - Shows when category is selected */}
+                {formData.categoryId && (
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h5 className="text-lg font-medium">Product Options</h5>
+                        <p className="text-sm text-cdark-500">
+                          Configure options for this product
+                        </p>
+                      </div>
+                      {isLoadingCategoryOptions && (
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-cblue-600"></div>
+                      )}
+                    </div>
+
+                    {categoryOptions.length === 0 && !isLoadingCategoryOptions && (
+                      <p className="text-sm text-cdark-500 italic">
+                        No options available for this category.
+                      </p>
+                    )}
+
+                    <div className="space-y-3">
+                      {productOptions.map((option) => (
+                        <div key={option.categoryOptionId} className="border border-cdark-200 rounded-lg">
+                          <button
+                            type="button"
+                            onClick={() => toggleOptionExpand(option.categoryOptionId)}
+                            className="w-full flex items-center justify-between p-3 hover:bg-cgrey-50 rounded-lg transition-colors"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{option.name}</span>
+                              {option.values.length > 0 && (
+                                <span className="text-xs bg-cblue-100 text-cblue-700 px-2 py-0.5 rounded-full">
+                                  {option.values.length}
+                                </span>
+                              )}
+                            </div>
+                            {option.isExpanded ? (
+                              <ChevronUp size={18} className="text-cdark-500" />
+                            ) : (
+                              <ChevronDown size={18} className="text-cdark-500" />
+                            )}
+                          </button>
+
+                          {option.isExpanded && (
+                            <div className="p-3 pt-0 border-t border-cdark-100">
+                              <div className="flex flex-wrap gap-2 mt-3">
+                                {option.values.map((value, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex items-center gap-1 px-2 py-1 bg-cblue-50 text-cblue-700 rounded-md text-sm"
+                                  >
+                                    <span>{value}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeOptionValue(option.categoryOptionId, index)}
+                                      className="hover:text-error-600"
+                                    >
+                                      <X size={14} />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+
+                              <div className="flex gap-2 mt-3">
+                                <input
+                                  type="text"
+                                  placeholder={`Add ${option.name} value...`}
+                                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-cdark-200 focus:outline-none focus:border-cblue-500"
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      e.preventDefault()
+                                      addOptionValue(option.categoryOptionId, e.currentTarget.value)
+                                      e.currentTarget.value = ""
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  onClick={(e) => {
+                                    const input = (e.currentTarget.previousSibling as HTMLInputElement)
+                                    addOptionValue(option.categoryOptionId, input.value)
+                                    input.value = ""
+                                  }}
+                                >
+                                  <Plus size={16} />
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div>
-                  <label className="block text-sm font-medium mb-1">Price *</label>
+                  <label className="block text-sm font-medium mb-1">Base Price *</label>
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                    value={formData.basePrice}
+                    onChange={(e) => setFormData({ ...formData, basePrice: parseFloat(e.target.value) || 0 })}
                     className="w-full px-4 py-2 rounded-lg border border-cdark-200 focus:outline-none focus:border-cblue-500"
                     required
                   />
@@ -349,20 +580,9 @@ export default function AdminProductsList() {
                   <input
                     type="number"
                     step="0.01"
-                    value={formData.compareAtPrice || ""}
-                    onChange={(e) => setFormData({ ...formData, compareAtPrice: parseFloat(e.target.value) || null })}
+                    value={formData.compareAtPrice ?? ""}
+                    onChange={(e) => setFormData({ ...formData, compareAtPrice: parseFloat(e.target.value) || undefined })}
                     className="w-full px-4 py-2 rounded-lg border border-cdark-200 focus:outline-none focus:border-cblue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">SKU *</label>
-                  <input
-                    type="text"
-                    value={formData.sku}
-                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg border border-cdark-200 focus:outline-none focus:border-cblue-500"
-                    required
                   />
                 </div>
 
@@ -370,8 +590,8 @@ export default function AdminProductsList() {
                   <label className="block text-sm font-medium mb-1">Stock Quantity *</label>
                   <input
                     type="number"
-                    value={formData.inventoryQuantity}
-                    onChange={(e) => setFormData({ ...formData, inventoryQuantity: parseInt(e.target.value) || 0 })}
+                    value={formData.stockQuantity}
+                    onChange={(e) => setFormData({ ...formData, stockQuantity: parseInt(e.target.value) || 0 })}
                     className="w-full px-4 py-2 rounded-lg border border-cdark-200 focus:outline-none focus:border-cblue-500"
                     required
                   />
@@ -431,22 +651,21 @@ export default function AdminProductsList() {
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
-                      id="isFeatured"
-                      checked={formData.isFeatured}
-                      onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                      id="trackInventory"
+                      checked={formData.trackInventory}
+                      onChange={(e) => setFormData({ ...formData, trackInventory: e.target.checked })}
                       className="rounded border-cdark-300 text-cblue-600 focus:ring-cblue-500"
                     />
-                    <label htmlFor="isFeatured" className="text-sm font-medium">Featured Product</label>
+                    <label htmlFor="trackInventory" className="text-sm font-medium">Track Inventory</label>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Weight (kg)</label>
+                  <label className="block text-sm font-medium mb-1">Low Stock Threshold</label>
                   <input
                     type="number"
-                    step="0.01"
-                    value={formData.weight || ""}
-                    onChange={(e) => setFormData({ ...formData, weight: parseFloat(e.target.value) || null })}
+                    value={formData.lowStockThreshold ?? 5}
+                    onChange={(e) => setFormData({ ...formData, lowStockThreshold: parseInt(e.target.value) || 5 })}
                     className="w-full px-4 py-2 rounded-lg border border-cdark-200 focus:outline-none focus:border-cblue-500"
                   />
                 </div>
@@ -455,22 +674,22 @@ export default function AdminProductsList() {
                   <label className="block text-sm font-medium mb-1">Barcode</label>
                   <input
                     type="text"
-                    value={formData.barcode || ""}
-                    onChange={(e) => setFormData({ ...formData, barcode: e.target.value || null })}
+                    value={formData.barcode ?? ""}
+                    onChange={(e) => setFormData({ ...formData, barcode: e.target.value || undefined })}
                     className="w-full px-4 py-2 rounded-lg border border-cdark-200 focus:outline-none focus:border-cblue-500"
                   />
                 </div>
 
                 {/* SEO Section */}
-                <div className="border-t pt-4">
+                <div className="pt-2">
                   <h5 className="text-lg font-medium mb-4">SEO Settings</h5>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">Meta Title</label>
                       <input
                         type="text"
-                        value={formData.metaTitle || ""}
-                        onChange={(e) => setFormData({ ...formData, metaTitle: e.target.value || null })}
+                        value={formData.metaTitle ?? ""}
+                        onChange={(e) => setFormData({ ...formData, metaTitle: e.target.value || undefined })}
                         className="w-full px-4 py-2 rounded-lg border border-cdark-200 focus:outline-none focus:border-cblue-500"
                       />
                     </div>
@@ -479,8 +698,8 @@ export default function AdminProductsList() {
                       <label className="block text-sm font-medium mb-1">Meta Description</label>
                       <input
                         type="text"
-                        value={formData.metaDescription || ""}
-                        onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value || null })}
+                        value={formData.metaDescription ?? ""}
+                        onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value || undefined })}
                         className="w-full px-4 py-2 rounded-lg border border-cdark-200 focus:outline-none focus:border-cblue-500"
                       />
                     </div>
